@@ -1,0 +1,17 @@
+We need to develop a Chatbot for our Whatsapp Business. I'm sharing the main idea but we can make it simpler at the beginning.
+> Users start the convesrasation. The only path that we want to recognize is if the client write a) text 1 b) text 2 - so we give only 2 possibility that we can recognize. Like: Hello or Ciao
+> Our chatbot answer and show the photo of the product. He can choose between 2
+> Client choose which product he want
+> Our Chatbot ask how many and if the want someting more
+> When client confirm we need to ask:
+>> Name and Surname for the shipping
+>> Shipping address
+>> Type of delivery
+>> When he want the order
+>> If he want to write a Gift message
+>>> From here we can process manually the order.
+
+> If it's possible should be great if:
+>> we can send the link to make the payment by paypal pro
+>> create order inside magento 1.9
+* I can consider also this second part on the basis of time and cost.

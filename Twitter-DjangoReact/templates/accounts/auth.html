@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class='col-10 col-md-4 max-auto'>
+<h1>{{ title }}</h1>
+{% if description %}
+<p>{{ description }}</p>
+{% endif %}
+    <!-- If the included template required any context, it needs to be included
+    in this format -->
+    {% include 'components/form.html' with form=form btn_label=btn_label %}
+</div>
+{% endblock content %}

@@ -1,0 +1,6 @@
+We're trying to add stripe connect to pay users in a marketplace built on Django.
+This should be a reasonably quick project, we're just looking to hand our Django website off to someone
+with experience setting up StripeConnect so we can make sure we are doing the oauth link and other good
+security practices correctly.
+
+Try connecting to oath in this app!

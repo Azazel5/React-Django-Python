@@ -1,0 +1,11 @@
+The project involves creating a python script for scraping a website to extract all product details
+and images and save the details to csv.
+
+The product details should be at least:
+1. Product Title
+2. Product Price
+3. Product Brand
+4. Product Parent Category
+5. Product Subcategory
+
+The images should be renamed to match the product title and saved to a zip file.

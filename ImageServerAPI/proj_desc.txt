@@ -1,0 +1,12 @@
+The goal of this project is to create an image server that provides a REST API for
+• Creating new users (each user should have a unique id and a name).
+• Listing the users in the system.
+• Uploading .jpg images to a user's online storage space (each image should have a unique key
+and a title).
+• Listing the available images by user id.
+• Obtaining the images from the server.
+• The API should be developed in such a way as to support Hypermedia.
+• The image server's REST API supports OAuth to allow third party applications to
+access a user's images.
+
+It should be containerized 

@@ -1,0 +1,7 @@
+I want you to write a Python script which scrapes through all the followers of an Instagram page, 
+then analyse all the verified pages followed by those followers and gives us the list of common verified
+pages for all the followers.
+Example : Input Account : Nike | Firstly Our script goes through the profile of all the followers of Nike
+and collects data about what other verified brands they follow. Example - Puma, Adidas, etc.
+Once this is done, we need data about common brands for all followers of Nike.
+If you have any questions, let me know.
