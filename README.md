@@ -8,7 +8,7 @@ Each invidual folder is a sma. I focus on building the core functionality of the
 Each folder is its own project, and it contains a text file which lists the project requirements.
 Here's a general overview of each project and some new things I learnt during the process
 
-* react-freecodecamp - Completed the FreeCodeCamp's tutorial on React.js to learn more about the framework. Created controlled forms and a basic meme generator.
+* react-freecodecamp - Completed the FreeCodeCamp's tutorial on React.js to learn more about the framework. Created controlled forms and a basic meme generator. <br>
 New things learnt - Class based components, states, controlled form and event handling in React.
 
 * Twitter-DjangoReact - Followed the CodingEntreprenerus guide to use Django/REST framework and React.js in conjunction to create a twitter clone. It is a full fledged application featuring tweeting, retweeting, liking, unliking, authentication, and user profiles. <br>
