@@ -1,12 +1,14 @@
 # The-Learning-Path
 
 These are my efforts to gain real world experience in anything related to full-stack development (React.js, Django) and programming languages (python, javascript). 
-Each invidual folder is a sma. I focus on building the core functionality of the projects and select them based on my interests and what they might potentially teach me.
+Each invidual folder is a small project, tutorial, or notes on documentation where I focus on building and learning the core functionality of technology; I select them based on my interests and what they might potentially teach me.
 
 ## Structure and type of projects
 
 Each folder is its own project, and it contains a text file which lists the project requirements.
 Here's a general overview of each project and some new things I learnt during the process
+
+
 
 * react-freecodecamp - Completed the FreeCodeCamp's tutorial on React.js to learn more about the framework. Created controlled forms and a basic meme generator. <br>
 New things learnt - Class based components, states, controlled form and event handling in React.
