@@ -10,6 +10,8 @@ Here's a general overview of each project and some new things I learnt during th
 
 
 
+* ReactDocumentation - Read through the react documentation while commenting on things that stood out to me.
+
 * react-freecodecamp - Completed the FreeCodeCamp's tutorial on React.js to learn more about the framework. Created controlled forms and a basic meme generator. <br>
 New things learnt - Class based components, states, controlled form and event handling in React.
 
