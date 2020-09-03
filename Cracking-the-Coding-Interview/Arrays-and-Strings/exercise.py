@@ -48,6 +48,8 @@ Output: True (permutations: "taco cat". "atco cta". etc.)
 """
 
 def palindrome_permutation(s):
+    # For the string to be a permutation, there should be at most one character with an odd count
+
     str_count = Counter(s)
     odd_count = 0
     for key, val in str_count.items():
@@ -110,6 +112,8 @@ bytes, write a method to rotate the image by 90 degrees. (an you do this in plac
 """
 
 def rotate_matrix(matrix):
+    # A clockwise rotation is the same as the reverse + transpose of the matrix 
+
     matrix.reverse()
     for row in range(len(matrix)):
         for column in range(row):
