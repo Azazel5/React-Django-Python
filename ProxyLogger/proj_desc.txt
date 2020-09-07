@@ -1,3 +1,0 @@
-I want you to create a Python script that turns a computer into a Proxy. 
-The requirement is that I need to see every request made through this proxy, 
-and the headers/cookies of this request.

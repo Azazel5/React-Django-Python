@@ -8,7 +8,13 @@ Each invidual folder is a small project, tutorial, or notes on documentation whe
 Each folder is its own project, and it contains a text file which lists the project requirements.
 Here's a general overview of each project and some new things I learnt during the process
 
+* Advanced-CSS-SASS - An in-depth dive into the world of CSS and SASS. <br>
+New things learnt - Proper absolute positioning, clip-path, flexbox, and SASS
 
+* Cracking-the-Coding-Interview - Worked through the exercises from the classic interview prep book using python. 
+
+* BurgerBuilder-Udemy - Finished the complete React course from udemy.<br>
+New things learnt - Error boundaries, Redux state management, Suspense and Code splitting, Redux saga, Transitions, and many more!
 
 * ReactDocumentation - Read through the react documentation while commenting on things that stood out to me.
 
