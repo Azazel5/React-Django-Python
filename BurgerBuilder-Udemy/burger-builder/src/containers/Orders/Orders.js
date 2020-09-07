@@ -1,0 +1,45 @@
+import React, { Component } from 'react'
+import axios from '../../axios-orders'
+import Order from '../../components/Order/Order'
+import withErrorHandler from '../../hoc/withErrorHandler/withErrorHandler'
+import * as actionCreators from '../../store/actions/index'
+
+import Spinner from '../../components/UI/Spinner/Spinner'
+import {connect} from 'react-redux'
+
+class Orders extends Component {
+    componentDidMount() {
+        // Need to pass ther auth token held in auth reducer, which you can get from the 
+        // mapStateToProps, as you have access to all reducers there 
+        this.props.onFetchOrders(this.props.token, this.props.userId)
+    }
+
+    render() {
+        let orders = <Spinner />
+        if(!this.props.loading) {
+            orders = this.props.orders.map(order => {
+                    return <Order key={order.id} 
+                    price={+order.price}
+                    ingredients={order.ingredients}/>
+                })
+        }
+        return orders 
+    }
+}
+
+const mapStateToProps = state => {
+    return {
+        orders: state.order.orders, 
+        loading: state.order.loading, 
+        token: state.auth.token, 
+        userId: state.auth.userId 
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        onFetchOrders: (token, userId) => dispatch(actionCreators.fetchOrders(token, userId))
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(withErrorHandler(Orders, axios))
