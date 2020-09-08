@@ -124,6 +124,60 @@ class StackOfPlates:
 3.4 Queue via Stacks: Implement a MyQueue class which implements a queue using two stacks. 
 """
 
+class MyQueue:
+    # Queues are LIFO (Last in First Out)
+    # self.insertion becomes the order of dequeing in the Queue
+    # self.deletion becomes the order of enqueing
 
+    def __init__(self):
+        self.insertion = []     
+        self.deletion = []
 
+    def enqueue(self, value):
+        self.insertion.append(value)
+        if len(self.insertion) > 1:
+            self.deletion = self.insertion[::-1]
+        else:
+            self.deletion.append(value)
+
+    def dequeue(self):
+        if not self.is_empty():
+            top_queue = self.insertion.pop(0)
+            self.deletion.pop(self.deletion.index(top_queue))
+            return top_queue
+        else:
+            raise Exception("Cannot dequeue an empty queue")
+        
+    def is_empty(self):
+        return len(self.insertion) == len(self.deletion) == 0
+
+"""
+3.S Sort Stack: Write a program to sort a stack such that the smallest items are on the top. You can use
+an additional temporary stack, but you may not copy the elements into any other data structure
+(such as an array). The stack supports the following operations: push, pop, peek, and isEmpty. 
+"""
+
+class SortStack:
+    def __init__(self):
+        self.stack = []
+
+    def push(self, value):
+        self.stack.append(value)
+
+    def pop(self):
+        return self.stack.pop(0)
+
+    def peek(self):
+        return self.stack[-1] 
+
+    def is_empty(self):
+        return len(self.stack) == 0
+
+def sort_stack(self, stack):
+    temp = SortStack()
     
+
+s = SortStack()
+s.push(5)
+s.push(6)
+s.push(7)

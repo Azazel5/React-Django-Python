@@ -68,11 +68,14 @@ body {
     top: 40%;
     left: 50%;
     transform: translate(-50%, -50%);
+    text-align: center;
 }
 
 .heading-primary {
     color: #fff;
     text-transform: uppercase;
+    backface-visibility: hidden;
+    margin-bottom: 60px;
 }
 
 .heading-primary-main {
@@ -80,6 +83,7 @@ body {
     font-size: 60px;
     font-weight: 400;
     letter-spacing: 35px;
+    animation: ease-out moveInLeft 1s; 
 }
 
 .heading-primary-sub {
@@ -87,4 +91,129 @@ body {
     font-size: 20px;
     font-weight: 700;
     letter-spacing: 17.4px;
+    animation: ease-out moveInRight 1s;
+}
+
+/*
+ * Pseudo-classes are very useful. Some fine examples include :link, :hover, ::after, etc 
+ * i.e. styling elements under a condition 
+ * display: inline-block also converts block elements into inline-blocks as the name suggests,
+ * giving it a full line to itself, like a block. 
+ * The after pseudo-element is essentially the child of the element, so it needs a content, 
+ * display, height etc. To put an after selected element behind the parent, you can use 
+ * absolute positioning and z-index (prop used to judge if an element is on top of other)
+ * Smaller z-indexes are behind. A cool effect is to scale something up or down and make
+ * it disappear using opacity.
+*/
+.btn:link,
+.btn:visited {
+    position: relative;
+    display: inline-block;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 15px 40px; 
+    transition: all 0.2s;
+    border-radius: 100px;
+} 
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.btn:active {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+.btn::after {
+    display: inline-block;
+    content: "";
+    height: 100%;
+    width: 100%;
+    border-radius: 100px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    transition: all 0.4s;
+}
+
+.btn:hover::after {
+    transform: scaleX(1.4) scaleY(1.6);
+    opacity: 0;
+}
+
+.btn-white::after {
+    background-color: #fff;
+}
+
+.btn-white {
+    background-color: #fff;
+    color: #777;
+}
+
+/* You have two choices for animations: transitions (easy) and keyframes (more power and effort)
+ * When using keyframes, control the component using opacity and transform  
+ * Sometimes, animations shake: use the backface-visibility prop and set it to hidden
+ * This will hide the background of the animated element, which will make it look way smoother
+ * Transform is a very powerful prop; you can use it to move things around and combine it
+ * with pseudo-selectors to do awesome things.
+ * ---------------------------------------------------------------------------------------------
+ *  Transition: just specify which properties to affect and the time. Set the transition on the 
+ * intial state of the element
+ */
+@keyframes moveInLeft {
+    0% {
+        opacity: 0;
+        transform: translateX(-100px);
+    }
+
+    80% {
+        transform: translateX(10px) ;
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0); 
+    }
+}
+
+@keyframes moveInRight {
+    0% {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+
+    80% {
+        transform: translateX(-10px) ;
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0); 
+    }
+}
+
+@keyframes moveButtonUp {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0); 
+    }
+}
+
+/* Try to add multiple classes and make one class as general as possible
+ * Eg. There will be many buttons so .btn is general, and we simply added the class below
+ * to the animated button. Animation-fill-mode: backwards; applies styles from the 0%
+ * keyframe in the beginning otherwise the button starts at 0, goes to 30, and comes back
+ * to 0 (as there is a delay).
+ */
+.btn-animated {
+    animation: ease-out 0.5s moveButtonUp .75s;
+    animation-fill-mode: backwards;
 }
