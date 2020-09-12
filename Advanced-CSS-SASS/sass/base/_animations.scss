@@ -1,0 +1,53 @@
+/* You have two choices for animations: transitions (easy) and keyframes (more power and effort)
+ * When using keyframes, control the component using opacity and transform  
+ * Sometimes, animations shake: use the backface-visibility prop and set it to hidden
+ * This will hide the background of the animated element, which will make it look way smoother
+ * Transform is a very powerful prop; you can use it to move things around and combine it
+ * with pseudo-selectors to do awesome things.
+ * ---------------------------------------------------------------------------------------------
+ *  Transition: just specify which properties to affect and the time. Set the transition on the 
+ * intial state of the element
+ */
+ @keyframes moveInLeft {
+    0% {
+        opacity: 0;
+        transform: translateX(-10rem);
+    }
+
+    80% {
+        transform: translateX(1rem) ;
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0); 
+    }
+}
+
+@keyframes moveInRight {
+    0% {
+        opacity: 0;
+        transform: translateX(10rem);
+    }
+
+    80% {
+        transform: translateX(-1rem) ;
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0); 
+    }
+}
+
+@keyframes moveButtonUp {
+    0% {
+        opacity: 0;
+        transform: translateY(3rem);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0); 
+    }
+}

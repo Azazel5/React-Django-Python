@@ -1,0 +1,21 @@
+/* The universal reset: this fixes the problem you faced with margins 
+ * box-sizing isn't a naturally inherited prop, so, set it so and just put border-box
+ * once in the body.
+*/
+
+*,
+*::after,
+*::before {
+    margin: 0;
+    padding: 0;
+    box-sizing: inherit;
+}
+
+html {
+    font-size: 62.5%;
+}
+
+/* To get maximum value of inheritance, define font-styles, colors, etc in the body */
+body {
+    box-sizing: border-box;
+}

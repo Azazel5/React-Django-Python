@@ -1,0 +1,66 @@
+/*
+ * Pseudo-classes are very useful. Some fine examples include :link, :hover, ::after, etc 
+ * i.e. styling elements under a condition 
+ * display: inline-block also converts block elements into inline-blocks as the name suggests,
+ * giving it a full line to itself, like a block. 
+ * The after pseudo-element is essentially the child of the element, so it needs a content, 
+ * display, height etc. To put an after selected element behind the parent, you can use 
+ * absolute positioning and z-index (prop used to judge if an element is on top of other)
+ * Smaller z-indexes are behind. A cool effect is to scale something up or down and make
+ * it disappear using opacity.
+*/
+
+.btn {
+    &:link,
+    &:visited {
+        position: relative;
+        display: inline-block;
+        text-transform: uppercase;
+        text-decoration: none;
+        padding: 1.5rem 4rem; 
+        transition: all .2s;
+        border-radius: 10rem;
+        font-size: 1.6rem;
+    }
+
+    &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 1rem 2rem rgba($color-black .2);
+
+        &::after {
+            transform: scaleX(1.4) scaleY(1.6);
+            opacity: 0;
+        }
+    }
+
+    &:active {
+        transform: translateY(-1px);
+        box-shadow: 0 .5rem 1rem rgba($color-black .2);
+    }
+    
+    &::after {
+        display: inline-block;
+        content: "";
+        height: 100%;
+        width: 100%;
+        border-radius: 10rem;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: -1;
+        transition: all .4s;
+    }
+    
+    &--white {
+        background-color: $color-white;
+        color: $color-grey-dark;
+        &::after {
+            background-color: $color-white;
+        }
+    }
+
+    &--animated {
+        animation: ease-out .5s moveButtonUp .75s;
+        animation-fill-mode: backwards;
+    }
+}

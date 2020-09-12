@@ -1,28 +1,25 @@
-/*
-COLORS:
-
-Light green: #7ed56f
-Medium green: #55c57a
-Dark green: #28b485
-
+/* The universal reset: this fixes the problem you faced with margins 
+ * box-sizing isn't a naturally inherited prop, so, set it so and just put border-box
+ * once in the body.
 */
+*,
+*::after,
+*::before {
+  margin: 0;
+  padding: 0;
+  box-sizing: inherit; }
 
-/* The universal reset: this fixes the problem you faced with margins */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+html {
+  font-size: 62.5%; }
 
 /* To get maximum value of inheritance, define font-styles, colors, etc in the body */
 body {
-    font-family: "Lato", sans-serif;
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 1.7;
-    color: #777;
-    padding: 30px;
-}
+  font-family: "Lato", sans-serif;
+  font-weight: 400;
+  line-height: 1.7;
+  color: #777;
+  padding: 3rem;
+  box-sizing: border-box; }
 
 /*
  * You can add gradients over background images by giving opacities. 
@@ -30,32 +27,24 @@ body {
  * circles, whatever by giving coordinates, to create pretty shapes.
  */
 .header {
-    position: relative;
-    height: 95vh;
-    background-image: linear-gradient(
-        to right bottom,
-        rgba(126, 213, 111, 0.8),
-        rgba(40, 180, 133, 0.8)),
-        url('../img/hero.jpg');
-
-    background-size: cover;
-    background-position: top;
-    clip-path: polygon(0 0, 100% 0, 100% 75vh, 0 100%);
-}
+  position: relative;
+  height: 95vh;
+  background-image: linear-gradient(to right bottom, rgba(126, 213, 111, 0.8), rgba(40, 180, 133, 0.8)), url("../img/hero.jpg");
+  background-size: cover;
+  background-position: top;
+  clip-path: polygon(0 0, 100% 0, 100% 75vh, 0 100%); }
 
 /*
  * There has to be a reference from where the absolute elements positioning begins, which is 
  * precisely why the parent element needs a position: relative; 
  */
-.logo-box {
-    position: absolute;
-    top: 40px;
-    left: 40px;
-}
+.header__logo-box {
+  position: absolute;
+  top: 4rem;
+  left: 40px; }
 
-.logo {
-    height: 35px;
-}
+.header__logo {
+  height: 3.5rem; }
 
 /* Span elements are by default inline; block level elements take space before and after and 
  * occupy the full width they're given.
@@ -63,36 +52,32 @@ body {
  * only the top left of the element in the center (not making it look like it's in the center).
  * Add: transform: translate(-50%, -50%)
  */
-.text-box {
-    position: absolute;
-    top: 40%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-}
+.header__text-box {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center; }
 
 .heading-primary {
-    color: #fff;
-    text-transform: uppercase;
-    backface-visibility: hidden;
-    margin-bottom: 60px;
-}
+  color: #fff;
+  text-transform: uppercase;
+  backface-visibility: hidden;
+  margin-bottom: 6rem; }
 
-.heading-primary-main {
-    display: block;
-    font-size: 60px;
-    font-weight: 400;
-    letter-spacing: 35px;
-    animation: ease-out moveInLeft 1s; 
-}
+.heading-primary--main {
+  display: block;
+  font-size: 6rem;
+  font-weight: 400;
+  letter-spacing: 3.5rem;
+  animation: ease-out moveInLeft 1s; }
 
-.heading-primary-sub {
-    display: block;
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: 17.4px;
-    animation: ease-out moveInRight 1s;
-}
+.heading-primary--sub {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 1.75rem;
+  animation: ease-out moveInRight 1s; }
 
 /*
  * Pseudo-classes are very useful. Some fine examples include :link, :hover, ::after, etc 
@@ -107,51 +92,45 @@ body {
 */
 .btn:link,
 .btn:visited {
-    position: relative;
-    display: inline-block;
-    text-transform: uppercase;
-    text-decoration: none;
-    padding: 15px 40px; 
-    transition: all 0.2s;
-    border-radius: 100px;
-} 
+  position: relative;
+  display: inline-block;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 1.5rem 4rem;
+  transition: all .2s;
+  border-radius: 10rem;
+  font-size: 1.6rem; }
 
 .btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-}
+  transform: translateY(-3px);
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.2); }
 
 .btn:active {
-    transform: translateY(-1px);
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-}
+  transform: translateY(-1px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2); }
 
 .btn::after {
-    display: inline-block;
-    content: "";
-    height: 100%;
-    width: 100%;
-    border-radius: 100px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: -1;
-    transition: all 0.4s;
-}
+  display: inline-block;
+  content: "";
+  height: 100%;
+  width: 100%;
+  border-radius: 10rem;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  transition: all .4s; }
 
 .btn:hover::after {
-    transform: scaleX(1.4) scaleY(1.6);
-    opacity: 0;
-}
+  transform: scaleX(1.4) scaleY(1.6);
+  opacity: 0; }
 
-.btn-white::after {
-    background-color: #fff;
-}
+.btn--white::after {
+  background-color: #fff; }
 
-.btn-white {
-    background-color: #fff;
-    color: #777;
-}
+.btn--white {
+  background-color: #fff;
+  color: #777; }
 
 /* You have two choices for animations: transitions (easy) and keyframes (more power and effort)
  * When using keyframes, control the component using opacity and transform  
@@ -164,48 +143,32 @@ body {
  * intial state of the element
  */
 @keyframes moveInLeft {
-    0% {
-        opacity: 0;
-        transform: translateX(-100px);
-    }
-
-    80% {
-        transform: translateX(10px) ;
-    }
-
-    100% {
-        opacity: 1;
-        transform: translateX(0); 
-    }
-}
+  0% {
+    opacity: 0;
+    transform: translateX(-10rem); }
+  80% {
+    transform: translateX(1rem); }
+  100% {
+    opacity: 1;
+    transform: translateX(0); } }
 
 @keyframes moveInRight {
-    0% {
-        opacity: 0;
-        transform: translateX(100px);
-    }
-
-    80% {
-        transform: translateX(-10px) ;
-    }
-
-    100% {
-        opacity: 1;
-        transform: translateX(0); 
-    }
-}
+  0% {
+    opacity: 0;
+    transform: translateX(10rem); }
+  80% {
+    transform: translateX(-1rem); }
+  100% {
+    opacity: 1;
+    transform: translateX(0); } }
 
 @keyframes moveButtonUp {
-    0% {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translateY(0); 
-    }
-}
+  0% {
+    opacity: 0;
+    transform: translateY(3rem); }
+  100% {
+    opacity: 1;
+    transform: translateY(0); } }
 
 /* Try to add multiple classes and make one class as general as possible
  * Eg. There will be many buttons so .btn is general, and we simply added the class below
@@ -213,7 +176,43 @@ body {
  * keyframe in the beginning otherwise the button starts at 0, goes to 30, and comes back
  * to 0 (as there is a delay).
  */
-.btn-animated {
-    animation: ease-out 0.5s moveButtonUp .75s;
-    animation-fill-mode: backwards;
-}
+.btn--animated {
+  animation: ease-out .5s moveButtonUp .75s;
+  animation-fill-mode: backwards; }
+
+/* CSS Specificity
+*  ---------------
+* Stylesheets are parsed and cascaded on the basis of the specificity of the selector, which 
+* goes in the order of !important, inline, id, class, element 
+* The selector with the higher specificty (a, b, c, d) wins
+* Tips: a) remember that pseudo classes count as a class value and b) order css rule in decreasing
+* order of specificity eg. #my-div .divvy > element {}
+* rem - the rem unit is relative to the root font size, eg 1.5rem = 1.5 * 16 (if no root font has 
+* been specified)
+*/
+/* Some props like font-size are inherited from the parent, unless overriden in the child.
+ * The parent's width is the basis for percentage calculations; eg, padding: 10%; is 10% of width.
+ * em and rem are both font-based, but em uses the current element's parent while rem uses the root
+ * as a reference. This is only for fonts. If em is used for lengths, it uses the current element's
+ * font-size; for rem, it's the same in both cases, as it simply uses the root.
+ * vh/vw is useful as well
+ */
+/* A beautiful tactic: set the root font-size as 10px and set all paddings, margins, box shadows, etc
+ * as rem multiples. By that, just changing the root value will change all item's in an equal manner.
+ * Even better, put 62.5% as the root font-size (as it will be 10 anyways if the browser value
+ * is used, and will increase naturally if it's some other user-defined value)
+ */
+/* For HTML/CSS, organization becomes crucial, as the code starts getting messy.
+ * A good way to organize is to follow the BEM model, block, block__element, 
+ * block__element--model, eg - button, button__text, button__text--bold 
+ */
+/* The clearfix solution: add a clearfix class to the floated portion, and, in the css, attach
+ * an ::after selector to the class. Add the following props: content: "", clear: both, and 
+ * display:table. Or you could simply add it to the element::after. SASS comes with color
+ * functions, such as darken(color_variable, percentage). Check them out!
+ * You can create reusable pieces of CSS code (such as the clearfix thing), by doing 
+ * @mixin mixin_name {}, then @include mixin_name inside any selector. You can add arguments
+ * as well. You can create functions with @function in a similar manner. Inheritance is
+ * available as well. Create a parent 'class' by the %placeholder and extend that by 
+ * @extend %placeholder
+ */
