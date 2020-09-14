@@ -1,137 +1,3 @@
-/* The universal reset: this fixes the problem you faced with margins 
- * box-sizing isn't a naturally inherited prop, so, set it so and just put border-box
- * once in the body.
-*/
-*,
-*::after,
-*::before {
-  margin: 0;
-  padding: 0;
-  box-sizing: inherit; }
-
-html {
-  font-size: 62.5%; }
-
-/* To get maximum value of inheritance, define font-styles, colors, etc in the body */
-body {
-  font-family: "Lato", sans-serif;
-  font-weight: 400;
-  line-height: 1.7;
-  color: #777;
-  padding: 3rem;
-  box-sizing: border-box; }
-
-/*
- * You can add gradients over background images by giving opacities. 
- * clip-path can cut elements into whatever shape you want. you can define polygons, 
- * circles, whatever by giving coordinates, to create pretty shapes.
- */
-.header {
-  position: relative;
-  height: 95vh;
-  background-image: linear-gradient(to right bottom, rgba(126, 213, 111, 0.8), rgba(40, 180, 133, 0.8)), url("../img/hero.jpg");
-  background-size: cover;
-  background-position: top;
-  clip-path: polygon(0 0, 100% 0, 100% 75vh, 0 100%); }
-
-/*
- * There has to be a reference from where the absolute elements positioning begins, which is 
- * precisely why the parent element needs a position: relative; 
- */
-.header__logo-box {
-  position: absolute;
-  top: 4rem;
-  left: 40px; }
-
-.header__logo {
-  height: 3.5rem; }
-
-/* Span elements are by default inline; block level elements take space before and after and 
- * occupy the full width they're given.
- * Centering by position absolute isn't as simple as top: 50% and left: 50%, as that aligns
- * only the top left of the element in the center (not making it look like it's in the center).
- * Add: transform: translate(-50%, -50%)
- */
-.header__text-box {
-  position: absolute;
-  top: 40%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center; }
-
-.heading-primary {
-  color: #fff;
-  text-transform: uppercase;
-  backface-visibility: hidden;
-  margin-bottom: 6rem; }
-
-.heading-primary--main {
-  display: block;
-  font-size: 6rem;
-  font-weight: 400;
-  letter-spacing: 3.5rem;
-  animation: ease-out moveInLeft 1s; }
-
-.heading-primary--sub {
-  display: block;
-  font-size: 2rem;
-  font-weight: 700;
-  letter-spacing: 1.75rem;
-  animation: ease-out moveInRight 1s; }
-
-/*
- * Pseudo-classes are very useful. Some fine examples include :link, :hover, ::after, etc 
- * i.e. styling elements under a condition 
- * display: inline-block also converts block elements into inline-blocks as the name suggests,
- * giving it a full line to itself, like a block. 
- * The after pseudo-element is essentially the child of the element, so it needs a content, 
- * display, height etc. To put an after selected element behind the parent, you can use 
- * absolute positioning and z-index (prop used to judge if an element is on top of other)
- * Smaller z-indexes are behind. A cool effect is to scale something up or down and make
- * it disappear using opacity.
-*/
-.btn:link,
-.btn:visited {
-  position: relative;
-  display: inline-block;
-  text-transform: uppercase;
-  text-decoration: none;
-  padding: 1.5rem 4rem;
-  transition: all .2s;
-  border-radius: 10rem;
-  font-size: 1.6rem; }
-
-.btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.2); }
-
-.btn:active {
-  transform: translateY(-1px);
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2); }
-
-.btn::after {
-  display: inline-block;
-  content: "";
-  height: 100%;
-  width: 100%;
-  border-radius: 10rem;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: -1;
-  transition: all .4s; }
-
-.btn:hover::after {
-  transform: scaleX(1.4) scaleY(1.6);
-  opacity: 0; }
-
-.btn--white::after {
-  background-color: #fff; }
-
-.btn--white {
-  background-color: #fff;
-  color: #777; }
-
 /* You have two choices for animations: transitions (easy) and keyframes (more power and effort)
  * When using keyframes, control the component using opacity and transform  
  * Sometimes, animations shake: use the backface-visibility prop and set it to hidden
@@ -170,16 +36,328 @@ body {
     opacity: 1;
     transform: translateY(0); } }
 
+/* The universal reset: this fixes the problem you faced with margins 
+ * box-sizing isn't a naturally inherited prop, so, set it so and just put border-box
+ * once in the body.
+*/
+*,
+*::after,
+*::before {
+  margin: 0;
+  padding: 0;
+  box-sizing: inherit; }
+
+html {
+  font-size: 62.5%; }
+
+/* To get maximum value of inheritance, define font-styles, colors, etc in the body */
+body {
+  box-sizing: border-box; }
+
+body {
+  font-family: "Lato", sans-serif;
+  font-weight: 400;
+  line-height: 1.7;
+  color: #777;
+  padding: 3rem; }
+
+.heading-primary {
+  color: #fff;
+  text-transform: uppercase;
+  backface-visibility: hidden;
+  margin-bottom: 6rem; }
+  .heading-primary--main {
+    display: block;
+    font-size: 6rem;
+    font-weight: 400;
+    letter-spacing: 3.5rem;
+    animation: ease-out moveInLeft 1s; }
+  .heading-primary--sub {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 1.75rem;
+    animation: ease-out moveInRight 1s; }
+
+.heading-secondary {
+  display: inline-block;
+  font-size: 3.5rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  background-image: linear-gradient(to right, #7ed56f, #28b485);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  letter-spacing: .2rem;
+  transition: all .2s; }
+  .heading-secondary:hover {
+    transform: skewY(2deg) skewX(15deg) scale(1.1);
+    text-shadow: 0.5rem 1rem 2rem rgba(0, 0, 0, 0.2); }
+
+.heading-tertiary {
+  font-size: 1.6rem;
+  font-weight: 700;
+  text-transform: uppercase; }
+
+.paragraph {
+  font-size: 1.6rem; }
+  .paragraph:not(:last-child) {
+    margin-bottom: 3rem; }
+
+.u-center-text {
+  text-align: center; }
+
+.u-margin-bottom-big {
+  margin-bottom: 8rem; }
+
+.u-margin-bottom-medium {
+  margin-bottom: 4rem; }
+
+.u-margin-bottom-small {
+  margin-bottom: 1.5rem; }
+
+/*
+ * Pseudo-classes are very useful. Some fine examples include :link, :hover, ::after, etc 
+ * i.e. styling elements under a condition 
+ * display: inline-block also converts block elements into inline-blocks as the name suggests,
+ * giving it a full line to itself, like a block. 
+ * The after pseudo-element is essentially the child of the element, so it needs a content, 
+ * display, height etc. To put an after selected element behind the parent, you can use 
+ * absolute positioning and z-index (prop used to judge if an element is on top of other)
+ * Smaller z-indexes are behind. A cool effect is to scale something up or down and make
+ * it disappear using opacity.
+*/
+.btn:link, .btn:visited {
+  position: relative;
+  display: inline-block;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 1.5rem 4rem;
+  transition: all .2s;
+  border-radius: 10rem;
+  font-size: 1.6rem; }
+
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2); }
+  .btn:hover::after {
+    transform: scaleX(1.4) scaleY(1.6);
+    opacity: 0; }
+
+.btn:active {
+  transform: translateY(-1px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2); }
+
+.btn::after {
+  display: inline-block;
+  content: "";
+  height: 100%;
+  width: 100%;
+  border-radius: 10rem;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  transition: all .4s; }
+
+.btn--white {
+  background-color: #fff;
+  color: #777; }
+  .btn--white::after {
+    background-color: #fff; }
+
+.btn--animated {
+  animation: ease-out .5s moveButtonUp .75s;
+  animation-fill-mode: backwards; }
+
+.btn-text:link, .btn-text:visited {
+  display: inline-block;
+  font-size: 1.6rem;
+  color: #55c57a;
+  text-decoration: none;
+  border-bottom: 1px solid #55c57a;
+  padding: 3px;
+  transition: all .2s; }
+
+.btn-text:hover {
+  background-color: #55c57a;
+  color: #fff;
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px); }
+
+.btn-text:active {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  transform: translateY(0); }
+
+.composition {
+  position: relative; }
+  .composition__photo {
+    width: 55%;
+    box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.4);
+    border-radius: 2px;
+    position: absolute;
+    z-index: 10;
+    transition: all .2s;
+    outline-offset: 2rem; }
+    .composition__photo--p1 {
+      left: 0;
+      top: -2rem; }
+    .composition__photo--p2 {
+      right: 0;
+      top: 2rem; }
+    .composition__photo--p3 {
+      left: 20%;
+      top: 10rem; }
+    .composition__photo:hover {
+      outline: 1.5rem solid #55c57a;
+      transform: scale(1.05) translateY(-0.5rem);
+      box-shadow: 0 2.5rem 4rem rgba(0, 0, 0, 0.5);
+      z-index: 20; }
+  .composition:hover .composition__photo:not(:hover) {
+    transform: scale(0.95); }
+
+.feature-box {
+  background-color: rgba(255, 255, 255, 0.8);
+  font-size: 1.5rem;
+  padding: 2.5rem;
+  text-align: center;
+  border-radius: 3px;
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.15);
+  transition: all .2s; }
+  .feature-box__icon {
+    font-size: 6rem;
+    margin-bottom: .5rem;
+    background-image: linear-gradient(to right, #7ed56f, #28b485);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent; }
+  .feature-box:hover {
+    transform: translateY(-1.5rem) scale(1.03); }
+
+/* Make animations smoother and more real i.e. how far away it is 
+ * from the user. The child element i.e. &__side gets the view, not the parent.
+ * Need backface-visibility to hide the back value, as the front and back has 
+ * different colors, but they're still stacked on top of each other.
+ * Height collapse is a common problem in floating (clearfix), but it can 
+ * happen in position: absolute as well. In the case of abs, just specify the 
+ * height of parent and child as equal, and that should be it.
+ */
+.card {
+  position: relative;
+  perspective: 150rem;
+  -moz-perspective: 150rem;
+  height: 50rem; }
+  .card__side {
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: white;
+    font-size: 2rem;
+    height: 50rem;
+    transition: all .8s ease;
+    width: 100%;
+    backface-visibility: hidden;
+    border-radius: 3px;
+    box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.15); }
+    .card__side--front {
+      background-color: #fff; }
+    .card__side--back {
+      transform: rotateY(180deg); }
+      .card__side--back-1 {
+        background-image: linear-gradient(to right bottom, #ffb900, #ff7730); }
+  .card:hover .card__side--front {
+    transform: rotateY(180deg); }
+  .card:hover .card__side--back {
+    transform: rotateY(0deg); }
+
+/*
+ * You can add gradients over background images by giving opacities. 
+ * clip-path can cut elements into whatever shape you want. you can define polygons, 
+ * circles, whatever by giving coordinates, to create pretty shapes.
+ */
+.header {
+  position: relative;
+  height: 95vh;
+  background-image: linear-gradient(to right bottom, rgba(126, 213, 111, 0.8), rgba(40, 180, 133, 0.8)), url("../img/hero.jpg");
+  background-size: cover;
+  background-position: top;
+  clip-path: polygon(0 0, 100% 0, 100% 75vh, 0 100%);
+  /*
+    * There has to be a reference from where the absolute elements positioning begins, which is 
+    * precisely why the parent element needs a position: relative; 
+    */
+  /* Span elements are by default inline; block level elements take space before and after and 
+     * occupy the full width they're given.
+     * Centering by position absolute isn't as simple as top: 50% and left: 50%, as that aligns
+     * only the top left of the element in the center (not making it look like it's in the center).
+     * Add: transform: translate(-50%, -50%)
+     */ }
+  .header__logo-box {
+    position: absolute;
+    top: 4rem;
+    left: 40px; }
+  .header__logo {
+    height: 3.5rem; }
+  .header__text-box {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center; }
+
+/* Centering block elements in another block element 
+ margin: 0 (top-bottom) auto (left-right) */
+.row {
+  max-width: 114rem;
+  margin: 0 auto; }
+  .row:not(:last-child) {
+    margin-bottom: 8rem; }
+  .row::after {
+    content: "";
+    display: table;
+    clear: both; }
+  .row [class^="col-"] {
+    float: left; }
+    .row [class^="col-"]:not(:last-child) {
+      margin-right: 6rem; }
+  .row .col-1-of-2 {
+    width: calc((100% - 6rem)/2); }
+  .row .col-1-of-3 {
+    width: calc((100% - 2 * 6rem)/3); }
+  .row .col-2-of-3 {
+    width: calc(2* ((100% - 2 * 6rem)/3) + 6rem); }
+  .row .col-1-of-4 {
+    width: calc((100% - 3 * 6rem)/4); }
+  .row .col-2-of-4 {
+    width: calc(2* ((100% - 3 * 6rem)/4) + 6rem); }
+  .row .col-3-of-4 {
+    width: calc(3* ((100% - 3 * 6rem)/4) + 2 * 6rem); }
+
+.section-about {
+  background-color: #f7f7f7;
+  padding: 25rem 0;
+  margin-top: -20vh; }
+
+.section-features {
+  margin-top: -10rem;
+  padding: 20rem 0;
+  background-image: linear-gradient(to right bottom, rgba(126, 213, 111, 0.8), rgba(40, 180, 133, 0.8)), url("../img/nat-4.jpg");
+  background-size: cover;
+  transform: skewY(-7deg); }
+  .section-features > * {
+    transform: skewY(7deg); }
+
+.section-tours {
+  background-color: #f7f7f7;
+  padding: 25rem 0 50rem 0;
+  margin-top: -10rem; }
+
 /* Try to add multiple classes and make one class as general as possible
  * Eg. There will be many buttons so .btn is general, and we simply added the class below
  * to the animated button. Animation-fill-mode: backwards; applies styles from the 0%
  * keyframe in the beginning otherwise the button starts at 0, goes to 30, and comes back
  * to 0 (as there is a delay).
  */
-.btn--animated {
-  animation: ease-out .5s moveButtonUp .75s;
-  animation-fill-mode: backwards; }
-
 /* CSS Specificity
 *  ---------------
 * Stylesheets are parsed and cascaded on the basis of the specificity of the selector, which 
