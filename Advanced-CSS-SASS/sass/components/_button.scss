@@ -58,6 +58,15 @@
             background-color: $color-white;
         }
     }
+    
+    &--green {
+        background-color: $color-primary;
+        color: $color-white;
+        &::after {
+            background-color: $color-primary;
+        }
+    }
+
 
     &--animated {
         animation: ease-out .5s moveButtonUp .75s;

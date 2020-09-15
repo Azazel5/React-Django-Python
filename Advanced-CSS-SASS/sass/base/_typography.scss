@@ -36,8 +36,8 @@ body {
     text-transform: uppercase;
     font-weight: 700;
     background-image: linear-gradient(to right, $color-primary-light, $color-primary-dark);
-    background-clip: text;
     -webkit-background-clip: text;
+    background-clip: text;
     color: transparent;
     letter-spacing: .2rem;
     transition: all .2s;
