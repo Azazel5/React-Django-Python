@@ -105,22 +105,22 @@ body {
     margin-bottom: 3rem; }
 
 .u-center-text {
-  text-align: center; }
+  text-align: center !important; }
 
 .u-margin-bottom-big {
-  margin-bottom: 8rem; }
+  margin-bottom: 8rem !important; }
 
 .u-margin-bottom-medium {
-  margin-bottom: 4rem; }
+  margin-bottom: 4rem !important; }
 
 .u-margin-bottom-small {
-  margin-bottom: 1.5rem; }
+  margin-bottom: 1.5rem !important; }
 
 .u-margin-top-big {
-  margin-top: 8rem; }
+  margin-top: 8rem !important; }
 
 .u-margin-top-huge {
-  margin-top: 10rem; }
+  margin-top: 10rem !important; }
 
 /*
  * Pseudo-classes are very useful. Some fine examples include :link, :hover, ::after, etc 
@@ -133,7 +133,7 @@ body {
  * Smaller z-indexes are behind. A cool effect is to scale something up or down and make
  * it disappear using opacity.
 */
-.btn:link, .btn:visited {
+.btn, .btn:link, .btn:visited {
   position: relative;
   display: inline-block;
   text-transform: uppercase;
@@ -141,7 +141,9 @@ body {
   padding: 1.5rem 4rem;
   transition: all .2s;
   border-radius: 10rem;
-  font-size: 1.6rem; }
+  font-size: 1.6rem;
+  border: none;
+  cursor: pointer; }
 
 .btn:hover {
   transform: translateY(-3px);
@@ -150,7 +152,8 @@ body {
     transform: scaleX(1.4) scaleY(1.6);
     opacity: 0; }
 
-.btn:active {
+.btn:active, .btn:focus {
+  outline: none;
   transform: translateY(-1px);
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2); }
 
@@ -340,7 +343,7 @@ body {
     margin-bottom: 8rem; }
   .card__price-only {
     font-size: 1.4rem;
-    text-transform: ""; }
+    text-transform: uppercase; }
   .card__price-value {
     font-size: 6rem;
     font-weight: 100; }
@@ -349,9 +352,145 @@ body {
   width: 75%;
   margin: 0 auto;
   box-shadow: 0 3rem 6rem rgba(0, 0, 0, 0.1);
-  background-color: #fff;
+  background-color: rgba(255, 255, 255, 0.6);
   border-radius: 3px;
-  padding: 6rem; }
+  padding: 6rem;
+  padding-left: 9rem;
+  font-size: 1.6rem;
+  transform: skewX(-12deg);
+  /* shape outside only defines the shape, so you have to use clip-path to draw it out 
+     * To move around floated things, using a transform is better than simple margins. 
+     * Be wary when you have multiple translations in a single selector. If you try to 
+     * skew this story section, it won't work propery as the translate in &__shape takes
+     * precedence. 
+     */ }
+  .story > * {
+    transform: skewX(12deg); }
+  .story__shape {
+    width: 15rem;
+    height: 15rem;
+    float: left;
+    -webkit-clip-path: circle(50% at 50% 50%);
+    clip-path: circle(50% at 50% 50%);
+    -webkit-shape-outside: circle(50% at 50% 50%);
+    shape-outside: circle(50% at 50% 50%);
+    transform: translateX(-3rem) skewX(12deg);
+    position: relative; }
+  .story__img {
+    height: 100%;
+    transform: translateX(-4rem) scale(1.4);
+    backface-visibility: hidden;
+    transition: all .5s; }
+  .story__text {
+    transform: skewX(12deg); }
+  .story__caption {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, 20%);
+    color: #fff;
+    text-transform: uppercase;
+    font-size: 1.7rem;
+    text-align: center;
+    opacity: 0;
+    transition: all .5s;
+    backface-visibility: hidden; }
+  .story:hover .story__caption {
+    opacity: 1;
+    transform: translate(-50%, -50%); }
+  .story:hover .story__img {
+    transform: translateX(-4rem) scale(1);
+    filter: blur(3px) brightness(80%); }
+
+.bg-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: -1;
+  opacity: .15;
+  overflow: hidden; }
+  .bg-video__content {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; }
+
+.form__input {
+  display: block;
+  font-size: 1.5rem;
+  font-family: inherit;
+  color: inherit;
+  padding: 1.5rem 2rem;
+  border-radius: 2px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border: none;
+  border-bottom: 3px solid transparent;
+  width: 90%;
+  transition: all .3s; }
+  .form__input::-webkit-input-placeholder {
+    color: #999; }
+  .form__input:focus {
+    outline: none;
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.1);
+    border-bottom: 3px solid #55c57a; }
+  .form__input:focus:invalid {
+    border-bottom: 3px solid #ff7730; }
+
+.form__group:not(:last-child) {
+  margin-bottom: 2rem; }
+
+.form__label {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-left: 2rem;
+  margin-top: .7rem;
+  transition: all .3s; }
+
+.form__radio-input {
+  display: none; }
+
+.form__input:placeholder-shown + .form__label {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4rem); }
+
+.form__radio-group {
+  width: 49%;
+  display: inline-block; }
+
+.form__radio-label {
+  font-size: 1.6rem;
+  position: relative;
+  cursor: pointer;
+  padding-left: 4.5rem; }
+
+.form__radio-button {
+  display: inline-block;
+  position: absolute;
+  left: 0;
+  top: -.4rem;
+  height: 3rem;
+  width: 3rem;
+  border: 5px solid #55c57a;
+  border-radius: 50%; }
+  .form__radio-button::after {
+    height: 1.3rem;
+    width: 1.3rem;
+    content: "";
+    display: block;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #55c57a;
+    opacity: 0;
+    transition: opacity .2s; }
+
+.form__radio-input:checked ~ .form__radio-label .form__radio-button::after {
+  opacity: 1; }
 
 /*
  * You can add gradients over background images by giving opacities. 
@@ -416,6 +555,48 @@ body {
   .row .col-3-of-4 {
     width: calc(3* ((100% - 3 * 6rem)/4) + 2 * 6rem); }
 
+.footer {
+  background-color: #333;
+  color: #f7f7f7;
+  padding: 10rem 0;
+  font-size: 1.4rem;
+  /* You wanted the white line to only reach exactly till the navigation, but it exceeded that a little
+     * bit. The fix? Just setting display: inline-block; since inline-blocks only take up as much 
+     * space as they need. 
+     */ }
+  .footer__logo-box {
+    text-align: center;
+    margin-bottom: 8rem; }
+  .footer__logo {
+    width: 15rem;
+    height: auto; }
+  .footer__navigation {
+    display: inline-block;
+    border-top: 1px solid #777;
+    padding-top: 2rem; }
+  .footer__list {
+    list-style: none; }
+  .footer__item {
+    display: inline-block; }
+    .footer__item:not(:last-child) {
+      margin-right: 1.5rem; }
+  .footer__link:link, .footer__link:visited {
+    display: inline-block;
+    background-color: #333;
+    color: #f7f7f7;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: all .2s; }
+  .footer__link:hover, .footer__link:active {
+    color: #55c57a;
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.4);
+    transform: rotate(5deg) scale(1.3); }
+  .footer__copyright {
+    border-top: 1px solid #777;
+    padding-top: 2rem;
+    width: 80%;
+    float: right; }
+
 .section-about {
   background-color: #f7f7f7;
   padding: 25rem 0;
@@ -436,8 +617,22 @@ body {
   margin-top: -10rem; }
 
 .section-stories {
+  position: relative;
+  padding: 15rem 0; }
+
+.section-book {
   padding: 15rem 0;
-  background-color: #f7f7f7; }
+  background-image: linear-gradient(to right bottom, #7ed56f, #28b485); }
+
+.book {
+  background-image: linear-gradient(105deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.9) 50%, transparent 50%), url("../img/nat-10.jpg");
+  background-size: 100%;
+  height: 50rem;
+  border-radius: 3px;
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.2); }
+  .book__form {
+    width: 50%;
+    padding: 6rem; }
 
 /* Try to add multiple classes and make one class as general as possible
  * Eg. There will be many buttons so .btn is general, and we simply added the class below
