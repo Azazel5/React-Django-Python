@@ -12,10 +12,30 @@
 }
 
 html {
+    // We want 1 rem = 10px, so 10/16 (which is the default) = 62.5
+    // In the other viewports, we're changing the definition of 1 rem
+    // When using max-width, always add the larger media queries before the smaller ones
     font-size: 62.5%;
+    
+    @include respond(tab-land) {
+        font-size: 56.25%;
+    }
+    
+    @include respond(tab-port) {
+        font-size: 50%;
+    }
+    
+    @include respond(big-desktop) {
+        font-size: 75%;
+    }
 }
 
 /* To get maximum value of inheritance, define font-styles, colors, etc in the body */
 body {
     box-sizing: border-box;
+    padding: 3rem;
+
+    @include respond(tab-port) {
+        padding: 0;
+    }
 }

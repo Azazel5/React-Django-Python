@@ -1,0 +1,102 @@
+.popup {
+    width: 100%;
+    height: 100vh;
+    position: fixed;
+    background-color: rgba($color-black, .8);
+    top: 0;
+    left: 0;
+    z-index: 3000;
+
+    // Always add visibility: 0; to fully opaque things to hide its text content as well
+    opacity: 0;
+    visibility: hidden;
+    transition: all .3s;
+
+    // The target when a button is clicked/URL changes
+    &:target {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    // Once the target becomes active, scale up the content section
+    &:target &__content {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    &__close {
+        &:link, 
+        &:visited {
+            display: inline-block;
+            position: absolute;
+            top: 2.5rem;
+            right: 2.5rem;
+            color: $color-grey-dark;
+            font-size: 3rem;
+            text-decoration: none;
+            transition: all .2s;
+            line-height: 1;
+
+            &:hover {
+                color: $color-primary;
+            }
+        }
+    }
+
+    &__content {
+        @include absCenter;
+        display: table;
+        width: 75%;
+        background-color: white;
+        box-shadow: 0 2rem 4rem rgba($color-black, .2);
+        border-radius: 3px;
+        overflow: hidden;
+        opacity: 0;
+        
+        // This transform will conflict with the transform in the included absCenter mixin
+        // Solution: add them both into one
+        transform: translate(-50%, -50%) scale(.5);
+        transition: all .4s .2s; // the third argument is the transition delay 
+    }
+
+    // Here, the left occupies the entire height and right does not
+    // What can we do? display: table; (on the parent) and display: table-cell;
+    // The browser automatically equalizes the heights of both cells 
+    &__left {
+        width: 33.333333%;
+        display: table-cell;
+    }
+
+    &__right {
+        width: 66.6666667%;
+        display: table-cell;
+        vertical-align: middle;
+        padding: 3rem 5rem;
+    }
+
+    &__img {
+        display: block;
+        width: 100%;
+    }
+
+    // Column layout and automatic hyphenation! Needs lots of prefixes
+    // You can add column gap and column rule to have CSS automatically balance the height
+    // Remember: in production, just use an auto-prefixer tool to do this for you
+    &__text {
+        font-size: 1.4rem;
+        margin-bottom: 4rem;
+
+        -moz-column-count: 2;
+        -moz-column-gap: 4rem;
+        -moz-column-rule: 1px solid $color-grey-light-2;
+
+        column-count: 2;
+        column-gap: 4rem;
+        column-rule: 1px solid $color-grey-light-2;
+        -moz-hyphens: auto;
+        -ms-hyphens: auto;
+        -webkit-hyphens: auto;
+        hyphens: auto;
+
+    }
+}

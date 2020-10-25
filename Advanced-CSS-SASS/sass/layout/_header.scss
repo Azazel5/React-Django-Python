@@ -17,6 +17,10 @@
     background-position: top;
     clip-path: polygon(0 0, 100% 0, 100% 75vh, 0 100%);
 
+    @include respond(phone) {
+        clip-path: polygon(0 0, 100% 0, 100% 85vh, 0 100%);
+    }
+
     /*
     * There has to be a reference from where the absolute elements positioning begins, which is 
     * precisely why the parent element needs a position: relative; 
