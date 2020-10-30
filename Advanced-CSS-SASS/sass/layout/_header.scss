@@ -6,19 +6,44 @@
  */
 .header {
     position: relative;
-    height: 95vh;
-    background-image: linear-gradient(
+     background-image: linear-gradient(
         to right bottom,
         rgba($color-primary-light, .8),
         rgba($color-primary-dark, .8)),
-        url('../img/hero.jpg');
+        url('../img/hero-small.jpg');
 
     background-size: cover;
     background-position: top;
-    clip-path: polygon(0 0, 100% 0, 100% 75vh, 0 100%);
+
+    // The resolution of apple screens, which is pretty high
+    // You can add media queries together
+    // Also remember, there are other kinds of media queries (such as min-resolution)
+    // Phones usually have a DPR of 2x, so it doesn't make sense to have images > 1200px in width 
+    // Commas are like OR's in CSS
+
+    /* 
+     * min-resolution doesn't work on safari! The fix: webkit-min-device-pixel-ratio: 2 
+     * min-dpr: 2 should be the same as min-resolution: 192dpi
+     */
+    @media only screen and (min-resolution: 192dpi) and (min-width: 37.5em),
+    only screen and (-webkit-min-device-pixel-ratio: 2) and (min-width: 37.5em),
+    only screen and (min-width: 125em)  {
+        background-image: linear-gradient(
+            to right bottom,
+            rgba($color-primary-light, .8),
+            rgba($color-primary-dark, .8)),
+            url('../img/hero.jpg');
+    }
 
     @include respond(phone) {
+        -webkit-clip-path: polygon(0 0, 100% 0, 100% 85vh, 0 100%);
         clip-path: polygon(0 0, 100% 0, 100% 85vh, 0 100%);
+    }
+
+    @supports(clip-path: polygon(0 0)) or (-webkit-clip-path: polygon(0 0)) {
+        height: 95vh;
+        -webkit-clip-path: polygon(0 0, 100% 0, 100% 75vh, 0 100%);
+        clip-path: polygon(0 0, 100% 0, 100% 75vh, 0 100%);
     }
 
     /*

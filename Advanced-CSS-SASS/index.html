@@ -4,9 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     <link href="https://fonts.googleapis.com/css?family=Lato:100,300,400,700,900" rel="stylesheet">
-    <link rel="stylesheet" href="css/icon-font.css">
+    <link rel="stylesheet" href="css/icon-font.css"> <!-- During development this is needed, but remove it before deployment -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="shortcut icon" type="image/png" href="img/favicon.png">
 
@@ -79,9 +80,26 @@
                 </div>
                 <div class="col-1-of-2">
                     <div class="composition">
-                        <img src="img/nat-1-large.jpg" alt="Photo 1" class="composition__photo composition__photo--p1">
-                        <img src="img/nat-2-large.jpg" alt="Photo 2" class="composition__photo composition__photo--p2">
-                        <img src="img/nat-3-large.jpg" alt="Photo 3" class="composition__photo composition__photo--p3">
+                        <!--There are different kinds of descriptors: density, width, sizes, etc
+                        Basically, define a viewport and check the size of image at that, divide
+                        the width of image by the viewport to find the percentage width occupied 
+                        by the image, which is the width descriptor.-->
+
+                        <img srcset="img/nat-1.jpg 300w, img/nat-1-large.jpg 1000w" 
+                        sizes="(max-width: 56.25em) 20vw, (max-width: 37.5em) 30vw, 300px" alt="Photo 1"
+                        class="composition__photo composition__photo--p1"
+                        src="img/nat-1-large.jpg" />
+
+                        <img srcset="img/nat-2.jpg 300w, img/nat-2-large.jpg 1000w" 
+                        sizes="(max-width: 56.25em) 20vw, (max-width: 37.5em) 30vw, 300px" alt="Photo 2"
+                        class="composition__photo composition__photo--p2"
+                        src="img/nat-2-large.jpg" />
+
+                        <img srcset="img/nat-3.jpg 300w, img/nat-3-large.jpg 1000w" 
+                        sizes="(max-width: 56.25em) 20vw, (max-width: 37.5em) 30vw, 300px" alt="Photo 3"
+                        class="composition__photo composition__photo--p3"
+                        src="img/nat-3-large.jpg" />
+
                     </div>
                 </div>
             </div>
@@ -348,9 +366,18 @@
         </section>
     </main>
 
+    <!-- Just use srcset instead of src and add density descriptors -->
     <footer class="footer">
         <div class="footer__logo-box">
-            <img src="img/logo-green-2x.png" alt="Full logo" class="footer__logo">
+            <!-- Clearly, there are multiple ways of making images responsive. The 
+            benefit of using source is that you can assign media queries to it. -->
+            <picture class="footer__logo">
+                <source srcset="img/logo-green-small-1x.png 1x, img/logo-green-small-2x.png 2x" 
+                media="(max-width: 37.5em)">
+                <img srcset="img/logo-green-1x.png 1x, img/logo-green-2x.png 2x" alt="Full logo" 
+                class="footer__logo"
+                src="img/logo-green-2x.png">
+            </picture>
         </div>
 
         <div class="row">
@@ -384,7 +411,8 @@
             <div class="popup__right">
                 <a href="#section-tours" class="popup__close">&times;</a>
                 <h2 class="heading-secondary u-margin-bottom-medium">Start booking now</h2>
-                <h3 class="heading-tertiary u-margin-bottom-small">Important &ndash; Please read these terms before booking</h3>
+                <h3 class="heading-tertiary u-margin-bottom-small">Important &ndash; Please read these terms before
+                    booking</h3>
                 <p class="popup__text">
                     Lorem ipsum dolor sit amet consectetur adipisicing elit. Pariatur aut cumque libero est maxime quis
                     in eaque quasi soluta provident mollitia quibusdam laborum alias et, sequi quod quidem sint. Ea.
@@ -398,44 +426,6 @@
             </div>
         </div>
     </div>
-
-    <!--
-        <section class="grid-test">
-            <div class="row">
-                <div class="col-1-of-2">Col 1 of 2</div>
-                <div class="col-1-of-2">Col 1 of 2</div>
-            </div>
-
-            <div class="row">
-                <div class="col-1-of-3">Col 1 of 3</div>
-                <div class="col-1-of-3">Col 1 of 3</div>
-                <div class="col-1-of-3">Col 1 of 3</div>
-            </div>
-
-            <div class="row">
-                <div class="col-1-of-3">Col 1 of 3</div>
-                <div class="col-2-of-3">Col 2 of 3</div>
-            </div>
-
-            <div class="row">
-                <div class="col-1-of-4">Col 1 of 4</div>
-                <div class="col-1-of-4">Col 1 of 4</div>
-                <div class="col-1-of-4">Col 1 of 4</div>
-                <div class="col-1-of-4">Col 1 of 4</div>
-            </div>
-
-            <div class="row">
-                <div class="col-1-of-4">Col 1 of 4</div>
-                <div class="col-1-of-4">Col 1 of 4</div>
-                <div class="col-2-of-4">Col 2 of 4</div>
-            </div>
-
-            <div class="row">
-                <div class="col-1-of-4">Col 1 of 4</div>
-                <div class="col-3-of-4">Col 3 of 4</div>
-            </div>
-        </section>
-        -->
 </body>
 
 </html>

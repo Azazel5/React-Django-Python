@@ -112,6 +112,7 @@ celerybeat-schedule
 
 # mkdocs documentation
 /site
+NepalStockScraper
 
 # mypy
 .mypy_cache/

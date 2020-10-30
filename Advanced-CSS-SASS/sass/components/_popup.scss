@@ -7,6 +7,14 @@
     left: 0;
     z-index: 3000;
 
+    // Write down the whole property in the @supports tag if you want certain 
+    // logic to run if the browser supports any given property
+    @supports (-webkit-backdrop-filter: blur(10px)) or (backdrop-filter: blur(10px)) {
+        background-color: rgba($color-black, .3);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+    }
+
     // Always add visibility: 0; to fully opaque things to hide its text content as well
     opacity: 0;
     visibility: hidden;
@@ -52,6 +60,14 @@
         border-radius: 3px;
         overflow: hidden;
         opacity: 0;
+
+        @include respond(tab-port) {
+            height: 60%;
+        }
+
+        @include respond(phone) {
+            height: 80%;
+        }
         
         // This transform will conflict with the transform in the included absCenter mixin
         // Solution: add them both into one
@@ -65,18 +81,30 @@
     &__left {
         width: 33.333333%;
         display: table-cell;
+
+        @include respond(tab-port) {
+            display: none;
+        }
     }
 
     &__right {
-        width: 66.6666667%;
+        width: 66.100%;
         display: table-cell;
         vertical-align: middle;
         padding: 3rem 5rem;
+
+        @include respond(tab-port) {
+            width: 100%;
+        }
     }
 
     &__img {
         display: block;
         width: 100%;
+
+        @include respond(tab-port) {
+            display: none;
+        }
     }
 
     // Column layout and automatic hyphenation! Needs lots of prefixes
