@@ -1,0 +1,37 @@
+.container {
+    max-width: 120rem;
+    margin: 8rem auto;
+    background-color: var(--color-gray-light-1);
+    box-shadow: var(--shadow-dark);
+    min-height: 50rem;
+}
+
+.header {
+    display: flex;
+    font-size: 1.4rem;
+    align-items: center;
+    justify-content: space-between;
+    height: 7rem;
+    background-color: #fff;
+    border-bottom: var(--color-gray-light-2);
+}
+
+.content {
+    display: flex;
+}
+
+// To control width for flexbox, use flex-basis, which you can specify in the 
+// shorthand flex property (which takes in multiple values) 
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: var(--color-gray-dark-1);
+    flex: 0 0 18%;
+}
+
+// flex: 1; allows the element to grow as much as it can
+.hotel-view {
+    height: 80rem;
+    flex: 1;
+}
