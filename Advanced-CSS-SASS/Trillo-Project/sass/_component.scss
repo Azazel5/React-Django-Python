@@ -9,6 +9,13 @@
     justify-content: center;
     flex: 0 0 40%;
 
+    // default value for the order is 0
+    @media only screen and (max-width: $bp-smallest) {
+        order: 1;
+        flex: 0 0 100%; // to ensure that it starts wrapping from this breakpoint
+        background-color: var(--color-gray-light-2);
+    }
+
     // the input element doesn't inherit, so set it manually
     &__input {
         font-family: inherit;
@@ -114,12 +121,24 @@
     list-style: none;
     margin-top: 3.5rem;
 
+    @media only screen and (max-width: $bp-medium) {
+        display: flex;
+        margin: 0;
+    }
 
     &__item {
         position: relative;
 
         &:not(:last-child) {
             margin-bottom: .5rem;
+
+            @media only screen and (max-width: $bp-medium) {
+                margin: 0;
+            }
+        }
+
+        @media only screen and (max-width: $bp-medium) {
+            flex: 1;
         }
     }
 
@@ -161,6 +180,16 @@
         text-transform: uppercase;
         padding: 1.3rem 3rem;
         z-index: 10;
+
+        @media only screen and (max-width: $bp-medium) {
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        @media only screen and (max-width: $bp-small) {
+            flex-direction: column;
+            padding: 1.5rem .5rem;
+        }
     }
 
     // currentColor is the same as the parent element's color (which is the link)
@@ -169,6 +198,13 @@
         height: 1.75rem;
         margin-right: 2rem;
         fill: currentColor;
+
+        @media only screen and (max-width: $bp-small) {
+            margin-right: 0;
+            margin-bottom: .7rem;
+            width: 1.5rem;
+            height: 1.5rem;
+        }
     }
 }
 
@@ -177,6 +213,10 @@
     text-align: center;
     padding: 2.5rem;
     color: var(--color-gray-light-4);
+
+    @media only screen and (max-width: $bp-medium) {
+        display: none;
+    }
 }
 
 .gallery {
@@ -199,6 +239,11 @@
         text-transform: uppercase;
         letter-spacing: 1px;
         padding: 1.5rem 3rem;
+
+        @media only screen and (max-width: $bp-small) {
+            font-size: 1.8rem;
+            padding: 1.25rem 2rem;
+        }
     }
 
     // With SVGs, sometimes there will be a small whitespace around it, even after you align things.
@@ -235,17 +280,29 @@
         color: #fff;
         align-self: stretch;
         padding: 0 2.25rem;
+
+        @media only screen and (max-width: $bp-small) {
+            padding: 0 1.5rem;
+        }
     }
 
     &__rating-average {
         font-size: 2.25rem;
         font-weight: 300;
         margin-bottom: -3px;
+
+        @media only screen and (max-width: $bp-small) {
+            font-size: 1.8rem;
+        }
     }
 
     &__rating-count {
         font-size: .8rem;
         text-transform: uppercase;
+
+        @media only screen and (max-width: $bp-small) {
+            font-size: .5rem;
+        }
     }
 }
 
@@ -327,14 +384,17 @@
         margin-right: .7rem;
         content: "";
 
-        // background-image: url('../img/chevron-thin-right.svg');
-        // background-size: cover;
+        background-image: url('../img/chevron-thin-right.svg');
+        background-size: cover;
 
-        background-color: var(--color-primary);
-        -webkit-mask-image: url('../img/chevron-thin-right.svg');
-        mask-image: url('../img/chevron-thin-right.svg');
-        -webkit-mask-size: cover;
-        mask-size: cover;
+        @supports(-webkit-mask-image: url()) or (mask-image: url()) {
+            -webkit-mask-image: url('../img/chevron-thin-right.svg');
+            mask-image: url('../img/chevron-thin-right.svg');
+            -webkit-mask-size: cover;
+            mask-size: cover;
+            background-color: var(--color-primary);
+            background-image: none;
+        }
     }
 }
 
@@ -349,7 +409,7 @@
     }
 
     &__friends {
-
+        display: flex;
     }
 
     &__photo {
@@ -360,7 +420,7 @@
         border: 3px solid #fff;
 
         &:not(:last-child) {
-            margin-right: -1.5rem;
+            margin-right: -2rem;
         }
     }
 }
@@ -372,6 +432,11 @@
     padding: 3rem;
     margin-bottom: 3.5rem;
     overflow: hidden;
+
+    @media only screen and (max-width: $bp-medium) {
+        padding: 2rem;
+        margin-bottom: 3rem;
+    }
 
     // Reminder: Z-index only works if some sort of positioning has been set 
     &__text {
@@ -431,7 +496,7 @@
 }
 
 .cta {
-    padding: 3.5rem;
+    padding: 3.5rem 0;
     text-align: center;
 
     &__book-now {
@@ -439,6 +504,10 @@
         font-weight: 300;
         margin-bottom: 2.5rem;
         text-transform: uppercase;
+    }
+
+    @media only screen and (max-width: $bp-medium) {
+        padding: 2.5rem 0;
     }
 }
 

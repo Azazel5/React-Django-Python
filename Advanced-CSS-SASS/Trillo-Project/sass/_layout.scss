@@ -4,8 +4,15 @@
     background-color: var(--color-gray-light-1);
     box-shadow: var(--shadow-dark);
     min-height: 50rem;
+
+    @media only screen and (max-width: $bp-largest) {
+        margin: 0;
+        max-width: 100%;
+        width: 100%;
+    }
 }
 
+// When you set the parent flex:wrap all children 
 .header {
     display: flex;
     font-size: 1.4rem;
@@ -14,10 +21,22 @@
     height: 7rem;
     background-color: #fff;
     border-bottom: var(--line);
+
+    // the space between rows can be controlled by align-content
+    // it is usually used in conjunction with the flex-wrap and when there are multiple lines
+    @media only screen and (max-width: $bp-smallest) {
+        flex-wrap: wrap;
+        align-content: space-around;
+        height: 11rem;
+    }
 }
 
 .content {
     display: flex;
+
+    @media only screen and (max-width: $bp-medium) {
+        flex-direction: column;
+    }
 }
 
 // To control width for flexbox, use flex-basis, which you can specify in the 
@@ -38,12 +57,21 @@
 // Make the most of the "cascading" part of CSS by specifying font sizes and colors in parent 
 // elements (for parents-children which you want to look the same), so the children just inherit
 // those values. 
+// Larger media queries first -> smaller (if using max-width)
 .detail {
     display: flex;
     padding: 4.5rem;
     font-size: 1.4rem;
     background-color: var(--color-gray-light-1);
     border-bottom: var(--line);
+
+    @media only screen and (max-width: $bp-medium) {
+        padding: 3rem;
+    }
+
+    @media only screen and (max-width: $bp-small) {
+        flex-direction: column;
+    }
 }
 
 /* 
@@ -58,6 +86,16 @@
     margin-right: 4.5rem;
     box-shadow: var(--shadow-light);
     padding: 3rem;
+
+    @media only screen and (max-width: $bp-medium) {
+        padding: 2rem;
+        margin-right: 3rem;
+    }
+
+    @media only screen and (max-width: $bp-small) {
+        margin: 0;
+        margin-bottom: 3rem;
+    }
 }
 
 .user-reviews {

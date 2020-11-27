@@ -18,11 +18,19 @@
 
     // Shadows 
     --shadow-dark: 0 2rem 6rem rgba(0, 0, 0, .3);
-    --shadow-light: 0 2rem 5rem rgba($color: black, $alpha: .06)
+    --shadow-light: 0 2rem 5rem rgba($color: black, $alpha: .06);
 
     // Box shadows 
-    --line: 1px solid var(--color-gray-light-2)
+    --line: 1px solid var(--color-gray-light-2);
+    // CSS doesn't allow the usage of these variables in media queries!
 }
+
+// SASS variables for breakpoints
+$bp-largest: 75em;
+$bp-large: 68.75em;
+$bp-medium: 56.25em;
+$bp-small: 37.5em;
+$bp-smallest: 31.25em; 
 
 * {
     margin: 0;
@@ -38,6 +46,10 @@
 html {
     box-sizing: border-box;
     font-size: 62.5%;
+
+    @media only screen and (max-width: $bp-large) {
+        font-size: 50%;
+    }
 }
 
 body {
