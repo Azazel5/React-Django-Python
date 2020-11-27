@@ -18,6 +18,10 @@
 
     // Shadows 
     --shadow-dark: 0 2rem 6rem rgba(0, 0, 0, .3);
+    --shadow-light: 0 2rem 5rem rgba($color: black, $alpha: .06)
+
+    // Box shadows 
+    --line: 1px solid var(--color-gray-light-2)
 }
 
 * {

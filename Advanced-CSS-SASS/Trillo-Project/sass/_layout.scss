@@ -13,7 +13,7 @@
     justify-content: space-between;
     height: 7rem;
     background-color: #fff;
-    border-bottom: 1px solid var(--color-gray-light-2);
+    border-bottom: var(--line);
 }
 
 .content {
@@ -32,6 +32,37 @@
 
 // flex: 1; allows the element to grow as much as it can
 .hotel-view {
-    height: 80rem;
+    flex: 1;
+}
+
+// Make the most of the "cascading" part of CSS by specifying font sizes and colors in parent 
+// elements (for parents-children which you want to look the same), so the children just inherit
+// those values. 
+.detail {
+    display: flex;
+    padding: 4.5rem;
+    font-size: 1.4rem;
+    background-color: var(--color-gray-light-1);
+    border-bottom: var(--line);
+}
+
+/* 
+ * When using a percentage value for flex basis, there's no need to specify the first two arguments
+ * which are flex grow and flex shrink.
+ * If you ever notice flex items streching in relation to each other either horizontally or 
+ * vertically, realize that align-items/justify-content is streched by default.
+*/
+.description {
+    background-color: #fff;
+    flex: 0 0 60%;
+    margin-right: 4.5rem;
+    box-shadow: var(--shadow-light);
+    padding: 3rem;
+}
+
+.user-reviews {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     flex: 1;
 }
