@@ -33,3 +33,27 @@ body {
     font-weight: 300;
     line-height: 1.6;
 }
+
+/* Min-content makes the rows or columns adapt to the minimum length required for the content to fit
+ * into the grid row/column -> an easy and effective way to make things more responsive  
+ * Another extremely effective way to make responsive grid columns or rows is to use the minmax function,
+ * which can specify a range of values i.e. the min and the max that the element can take. 
+ * Here we have used a complicated way to center the grid (adding the extra fr's after the 8rem sidebar
+ * column) because this particular situation couldn't be solved by other easier alternatives, such as 
+ * margin: 0 auto or justify-content. 
+ * Taking some time to painstakenly name all the grids may pay dividends while using it, as referencing the 
+ * names will be way easier: note, this is only for big grids like this one. 
+*/
+.container {
+    display: grid;
+    grid-template-rows: 80vh min-content 40vw repeat(3, min-content);
+    grid-template-columns: [sidebar-start] 8rem [sidebar-end full-start]
+                            minmax(6rem, 1fr) [center-start] 
+                            repeat(8, [col-start] minmax(min-content, 14rem) [col-end])
+                            [center-end] minmax(6rem, 1fr) [full-end];
+    
+    & > * {
+        padding: 40px;
+        font-size: 3rem;
+    }
+}

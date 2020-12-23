@@ -1,0 +1,6 @@
+// When you have a named set of columns (you added the col-start/col-end in the repeat function, making 
+// it a named set, so you must pass in the col number as well (as done in the grid-column below)
+.header {
+    background-color: $color-grey-dark-1;
+    grid-column: full-start / col-end 6;
+}
