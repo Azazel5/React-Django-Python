@@ -1,4 +1,32 @@
+// Using auto-fit with the minmax function is an amazing way to make grids responsive such that 
+// they change from 3X2 to 2X3 or even 1X6 matrices. 
 .features {
-    background-color: $color-grey-light-2;
+    display: grid;
     grid-column: center-start / center-end;
+    grid-template-columns: repeat(auto-fit, minmax(25rem, 1fr));
+    grid-gap: 6rem;
+    margin: 15rem 0;
+}
+
+// Only if this class can be reused later elsewhere
+.feature {
+    display: grid;
+    align-items: start;
+    grid-template-columns: min-content 1fr;
+    grid-row-gap: 1.5rem;
+    grid-column-gap: 2.5rem;
+        
+    // the grid -1 property only works on explicit grids, so if you have't defined grid-row, then tough!
+    // remember: just like flexbox, align-items is strech by default!
+    &__icon {
+        height: 4.5rem;
+        width: 4.5rem;
+        fill: $color-primary;
+        grid-row: 1 / span 2;
+        transform: translateY(-1rem);
+    }
+
+    &__text {
+        font-size: 1.7rem;
+    }
 }

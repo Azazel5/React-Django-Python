@@ -1,0 +1,33 @@
+// This is an extend, which works into the other way round as compared to mixins: the heading-#s 
+// are copied into the extendor instead 
+%heading {
+    font-family: $font-display;
+    font-weight: 400;
+}
+
+.heading-1 {
+    @extend %heading;
+}
+
+.heading-2 {
+    @extend %heading;
+}
+
+.heading-3 {
+    @extend %heading;
+}
+
+// In cases where you want to use the same classes with slightly different modifications, use the 
+// modifier class as detailed below 
+.heading-4 {
+    @extend %heading;
+    font-size: 1.9rem;
+
+    &--light {
+        color: $color-grey-light-1;
+    }
+
+    &--dark {
+        color: $color-grey-dark-1;
+    }
+}
