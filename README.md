@@ -8,8 +8,8 @@ Each invidual folder is a small project, tutorial, or notes on documentation whe
 Each folder is its own project, and it contains a text file which lists the project requirements.
 Here's a general overview of each project and some new things I learnt during the process
 
-* Advanced-CSS-SASS - An in-depth dive into the world of CSS and SASS. <br>
-New things learnt - Proper absolute positioning, clip-path, flexbox, and SASS
+* Advanced-CSS-SASS - Completed Jonas Schmedtmann's advanced CSS and SASS course, which provides an in-depth dive into the world of CSS and SASS. Built a series of complex, real-world projects using the awesome tools <br>
+New things learnt - Proper absolute positioning, clip-path, flexbox, grids, and SASS
 
 * Cracking-the-Coding-Interview - Worked through the exercises from the classic interview prep book using python. 
 
