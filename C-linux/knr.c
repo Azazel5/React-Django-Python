@@ -490,7 +490,7 @@ void countCKeywords()
 // struct key *
 // binary(...)
 
-// Structs can also refer to themselves. Let's take the problem of trying to coutn occurrences of all
+// Structs can also refer to themselves. Let's take the problem of trying to count occurrences of all
 // words in an input. We can use structs to implement binary trees to help us do that efficiently.
 // We'll make it so that the left subtree will only contain words smaller than the word at the node
 // and the right subtree will have the "greater" words.
@@ -670,7 +670,7 @@ struct
 // is the typedef facility. The typedef occurs after the variable type i.e. typdef char *reverendDonkBonkers.
 
 // Here's a good example, using the tree nodes shown earlier
-typedef struct tnode
+typedef struct tnode_
 {
     char *word;
     int count;
@@ -681,6 +681,83 @@ typedef struct tnode
 // Why do this? This will give you the structure and a pointer to the structure too. Using this,
 // you'll be able to pass in the TREEPTR in the alloc call too: you'll get more flexibility and
 // readability.
+
+// The simplest you can get with IO is the getchar and putchar functions. Also, in the terminal, you
+// can switch whether you want input to be read from the terminal or another file via the < operator.
+// Also, you can use pipes i.e. | to provide IO from one program to another. Example - otherprog | prog
+// will cause the input for prog to come from the output of otherprog. Similarly, we have the > command
+// which writes the program output to a file instead of the terminal too.
+
+// Since the cat utility simply reads a file, you can combine the output of multiple files into one single
+// thing a la cat file1 file2 ... | lower > output, which creates a pipe: the output of all the files is
+// sent to "lower" (as input), and the lower-case resultant is returned as output file.
+
+/* Each format specifier in printf can have options added to it -
+ * 1. Minus sign: left adjustment 
+ * 2. Digit string: minimum field width
+ * 3. Period: seperates field width with the next digit string, which is..
+ * 4. The precision digit string: used for floats or doubles 
+ * 5. Length modifier l: indicates that the data item is a long and not an int 
+ * 
+ * The conversion characters available:
+ * d (decimal), o (unsigned octal), x (unsigned hexadecimal), u (unsigned decimal), 
+ * c (single character), s (string), e (scientific notation), f (float or double),
+ * g (e or f, whichever is shorter, and ignores non-significant zeroes) 
+*/
+
+// For scanf, you must specify the arguments as pointers to where the read input must reside.
+// The conversion characters for scanf is similar to printf, but it has some differences,
+// which can be checked via documentation.
+
+// There are variables flavors of printf/scanf avaiable, such as sscanf or sprintf, which
+// operate on strings instead of files.
+
+// Opening a file, using high level IO, is as simple as an fopen call, which returns a
+// struct pointer (internally implemented as a typedef) called FILE *. Note - opening an
+// existing file for writing will discard all the previous contents. To read, the simplest way is
+// to use the getc and putc functions. There are three files opened automatically in every C
+// prgoram, which are stdin, stdout, and stderr. For formatted IO of files, use fprintf and
+// fscanf.
+
+/*
+    ### An implementation of the cat utility in UNIX ###
+
+    void filecopy(FILE *fp) {
+        int c;
+
+        while ((c = getc(fp)) != EOF)
+            putc(c, stdout);
+    }
+
+    int main(int argc, char *argv[]) {
+        FILE *fp;
+
+        if (argc == 1)
+            filecopy(stdin);
+
+        else {
+            while (--argc > 0)
+
+                if ((fp = fopen(*++argv, "r")) == NULL) {
+                    fprintf(stderr, "cat: can't open %s\n", *argv);
+                    exit(1);
+
+                } else {
+                    filecopy(fp);
+                    fclose(fp);
+                }
+        }
+
+        exit(0);
+    }
+*/
+
+// Standard IO also provides the fgets function, which reads the input line by line, into a buffer.
+// fputs for putting in lines, as usual.
+
+// The calloc function is just like the alloc written in the book, as it returns a pointer to
+// enough space for n objects of the specified size -> cfree to free the pointer. Calloc
+// initializes the memory to 0, whereas malloc doesn't.
 
 int main()
 {
