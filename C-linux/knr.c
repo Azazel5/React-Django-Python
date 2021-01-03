@@ -1,6 +1,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <sys/dir.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 /*
  * Just to be clear, a call by reference is passing a pointer to the function. Array arguments are 
@@ -758,6 +764,232 @@ typedef struct tnode_
 // The calloc function is just like the alloc written in the book, as it returns a pointer to
 // enough space for n objects of the specified size -> cfree to free the pointer. Calloc
 // initializes the memory to 0, whereas malloc doesn't.
+
+// In any given UNIX system, everything is a file, even the user's terminal. All this communication
+// is done via file descriptors. Whenever, the terminal runs a program in UNIX, three files are
+// created, just just in C programs described above. In this case, the file descriptors 0, 1, and 2
+// are opened, which correspond to stdin, stdout, and stderr respectively. IO redirection is done as
+// usual with < and >.
+
+// For low level IO, the open/read/write operations become an entry point to the OS, where everything is
+// done in bytes.
+
+// Note the byte count to read or write is arbitrary; however, some commonly used examples include 1
+// (1 char at a time) or 512 (a physical blocksize on many devices). The latter is more efficient.
+// For the open function, pass in 0 for read, 1 for write, and 2 for read/write access.
+
+// An implementation of the UNIX utility cp, which copies one file to the other
+#define BUFSIZE_ 512
+#define PMODE 0644
+
+void error(char *s1, char *s2)
+{
+    printf("%s %s\n", s1, s2);
+    exit(1);
+}
+
+int main_cp(int argc, char *argv[])
+{
+    int f1, f2, f3, n;
+    char buf[BUFSIZE_];
+
+    if (argc != 3)
+        error("Usage: cp from to", NULL);
+    if ((f1 = open(argv[1], 0)) == -1)
+        error("cp: can't open %s", argv[1]);
+    if ((f2 = creat(argv[2], PMODE)) == -1)
+        error("cp: can't create %s", argv[2]);
+
+    while ((n = read(f1, buf, BUFSIZE_)) > 0)
+        if (write(f2, buf, n) != n)
+            error("cp: write error", NULL);
+
+    exit(0);
+}
+
+// File IO is sequential, but you can access files at whatever position you desire using the lseek function.
+// lseek(fd, offset, origin) - where origin can be 0, 1, 2 (start, current, or end of file)
+// Since the FILE * is actually a struct, there's a wealth of information available about the file to you.
+// This is the information about what it contains, rather about the file itself. For that we need the
+// directory information.
+
+// fsize, a special type of "ls" command, which also prints the file sizes.
+// A directory is also a file! Ay yai yai UNIX!
+// Use the dirent structure to get the inode number and the filename.
+
+void directory(char *name)
+{
+    /* 
+    struct dirent dirbuf;
+    char *npb, *nep;
+    int i, fd;
+
+    npb = name + strlen(name);
+    *npb++ = '/';
+    if (npb + DIRSIZ + 2 >= name + BUFSIZE)
+        return;
+    if ((fd = open(name, 0)) == -1)
+        return;
+    while (read(fd, (char *) &dirbuf, sizeof(dirbuf)) > 0) {
+        
+        if (dirbuf.d_ino == 0)    *** 0 inode number means that the slot is unused ***
+            continue;
+        if ((strcmp(dirbuf.d_name, ".") == 0) || (strcmp(dirbuf.d_name, "..")) == 0)
+            continue; *** If the directory is itself or its parent, skip ***
+        
+        for (i = 0, nep=npb; i < DIRSIZ; i++)
+            *nep++ = dirbuf.d_name[i];
+
+        *nep++ = '\0';
+        fsize(name);
+    }
+
+    close(fd);
+    *--npb = '\0'; 
+
+    --- This function has been commented because my compiler cannot find DIRSIZ in <sys/dir.h> for some reason.
+    */
+}
+
+void fsize(char *name)
+{
+    struct stat stbuf;
+
+    if (stat(name, &stbuf) == -1)
+    {
+        fprintf(stderr, "fsize: can't find %s\n", name);
+        return;
+    }
+
+    // If the file type is a directory
+    if ((stbuf.st_mode & S_IFMT) == S_IFDIR)
+        directory(name);
+
+    printf("%8lld %s\n", stbuf.st_size, name);
+}
+
+int main__(int argc, char *argv[])
+{
+    char buf[256];
+
+    if (argc == 1)
+    {
+        strcpy(buf, ".");
+        fsize(buf);
+    }
+    else
+        while (--argc > 0)
+        {
+            strcpy(buf, *++argv);
+            fsize(buf);
+        }
+
+    return 0;
+}
+
+// Smart storage allocator
+// This one will dynamically allocate memory instead of a compiled size array. Also, since other parts
+// of the program may also request resources asynchronously, the space won't be continuous. Instead,
+// we will get back blocks of data, one will point to the others. While freeing, we must check if the
+// adjacent blocks are free as well, so we will be able to join those together.
+
+// *** This memory allocator is pretty complicated; COME BACK TO THIS AFTER PRACTICING MORE C ***
+
+typedef int ALIGN;
+typedef union header
+{
+    struct
+    {
+        union header *ptr;
+        unsigned size;
+    } s;
+
+    ALIGN x;
+} HEADER;
+
+static HEADER base;
+static HEADER *allocptr_al = NULL;
+
+void free_al(char *ap)
+{
+    register HEADER *p, *q;
+
+    p = (HEADER *)ap - 1;
+    for (q = allocptr_al; !(p > q && p < q->s.ptr); q = q->s.ptr)
+        if (q >= q->s.ptr && (p > q || p < q->s.ptr))
+            break;
+
+    if (p + p->s.size == q->s.ptr)
+    {
+        p->s.size += q->s.ptr->s.size;
+        p->s.ptr = q->s.ptr->s.ptr;
+    }
+    else
+        p->s.ptr = q->s.ptr;
+
+    if (q + q->s.size == p)
+    {
+        q->s.size += p->s.size;
+        q->s.ptr = p->s.ptr;
+    }
+    else
+        q->s.ptr = p;
+
+    allocptr_al = q;
+}
+
+static HEADER *morecore(unsigned nu)
+{
+    // This function asks the OS for memory. Since that is very expensive, it is only done after
+    // alloc passed it the number of units to allocate and rounds it up to a larger value.
+    register char *cp;
+    register HEADER *up;
+    register int rnu;
+
+    rnu = 128 * ((nu + 128 - 1) / 128); // 128 is the number of units to allocate at once
+    cp = sbrk(rnu * sizeof(HEADER));
+
+    if ((int)cp == -1)
+        return NULL;
+
+    up = (HEADER *)cp;
+    up->s.size = rnu;
+    free_al((char *)(up + 1));
+    return allocptr_al;
+}
+
+char *alloc_al(unsigned nbytes)
+{
+    register HEADER *p, *q;
+    register int nunits;
+
+    nunits = 1 + (nbytes + sizeof(HEADER) - 1) / sizeof(HEADER);
+    if ((q = allocptr_al) == NULL)
+    {
+        // No free list of blocks yet
+        base.s.ptr = allocptr_al = q = &base;
+        base.s.size = 0;
+    }
+
+    for (p = q->s.ptr;; q = p, p = p->s.ptr)
+    {
+        if (p->s.size >= nunits)
+            q->s.ptr = p->s.ptr;
+        else
+        {
+            p->s.size -= nunits;
+            p += p->s.size;
+            p->s.size = nunits;
+        }
+
+        allocptr_al = q;
+        return (char *)(p + 1);
+    }
+
+    if (p == allocptr_al)
+        if ((p = morecore(nunits)) == NULL)
+            return NULL;
+}
 
 int main()
 {
