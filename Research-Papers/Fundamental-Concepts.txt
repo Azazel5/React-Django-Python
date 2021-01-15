@@ -1,0 +1,34 @@
+Fundamental Concepts in Programming Languages
+---------------------------------------------
+
+When assigning new names to concepts, it's best to avoid using names which corelate to other ideas,
+even if it in a different field such as mathematics. 
+
+Generally, assignment in programming languages have a structure where the left side is an address 
+and the right side is a value. A "L-value" must have some content i.e. some associated R-value. One 
+name (or identifier) can have multiple addresses in different parts of the program, which is 
+essentially the theory of scope. 
+
+Since different programming languages have different expressions, they have their own micro-syntax,
+which is heavily used while processing the code in compilers. 
+
+In the abscence of assignment, R-values are all we're concerned about. Eg. think about a generic
+print statement print(5 + 7). Just like modus ponens, or simple recursion, complex statements 
+involving operators and operands must be broken down in its first principles, and then only
+can they be evaluated. Boolean expressions are treated a bit differently as it may not be 
+possible to evaluate both "arms" (x == 5) simultaneously. 
+
+Variables was a term programmers took from mathematics of course. However, the conflict is that
+the nature of assignment allows redefinitions of said variables, which doesn't happen in 
+mathematics. A variable, although it varies, stays the same during the course of an expression,
+in math at least. L-values are preserved though, making them the true variables, rather than 
+the R-values themselves. 
+
+While calling functions, you can pass either the L-value (call by reference) or R-value (call
+by value). Think about this for a second: if you have a function which does some calculation
+using its own variable, do you use its L-value or R-value? Simply put, using R-value is 
+preferred because it freezes the variable's value into the function and isn't affected someway
+in the future. 
+
+Early programming languages, such as CPL, saw the need to create private variables, to perform
+long-term computations, as local variables are destroyed and recreated on each function call. 
