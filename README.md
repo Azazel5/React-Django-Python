@@ -10,11 +10,10 @@ Here's a general overview of each project and some new things I learnt during th
 
 * Research-Papers - Reading good, peer-reviewed research papers to see what is going on in the technology landscape.
 
-* C-Linux - A collection of C and linux books I have read through and written code on. The goal of this is to learn completely new concepts which I have only scratched the surface on through my operating systems class.
-The books include:
-1. The C programming language (K and R)
-<br>
-New things learnt - Memory management, UNIX system, multi-threading, and low-level IO 
+* C-Linux - A collection of C and linux books I have read through and written code on. The goal of this is to learn completely new concepts which I have only scratched the surface on through my operating systems class. <br> New things learnt - Memory management, UNIX system, multi-threading, and low-level IO  <br>
+The books themselves include:
+    1. The C programming language (K and R)
+    2. Beej’s Guide to Network Programming <br>
 
 * Advanced-CSS-SASS - Completed Jonas Schmedtmann's advanced CSS and SASS course, which provides an in-depth dive into the world of CSS and SASS. Built a series of complex, real-world projects using the awesome tools <br>
 New things learnt - Proper absolute positioning, clip-path, flexbox, grids, and SASS

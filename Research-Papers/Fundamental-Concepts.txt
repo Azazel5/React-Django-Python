@@ -32,3 +32,35 @@ in the future.
 
 Early programming languages, such as CPL, saw the need to create private variables, to perform
 long-term computations, as local variables are destroyed and recreated on each function call. 
+
+Side effects are a worrisome part about function calling, as, in most programming languages,
+they can either be called as a routine or a function i.e. they can either change the structure
+of the internal store or just return a value. Just for reference, the paper has defined the
+internal store as a dictionary-like structure which holds the L-values and R-values of all 
+variables and their depictions. One way to avoid creating side-effects is to use constansts, 
+which are frozen variables such that they cannot be reassigned. Functions are created as 
+constants. 
+
+When storing/representing functions, there's a difficulty while defining its R-values, which 
+contains two parts: a rule for evaluating the expression and an environment which supplies
+its free variables. This complication is not specific to functions, but it also happens 
+while defining compound data structures, such as arrays, structs, or whatever. Recursively 
+defined functions also follow this closure-based R-values. This is the structure most recursive 
+functions have: Prog | R-val -----> Prog | R-val --|       (the first block is the closure
+                                    |______________|        and the second is a variable list)
+
+Simple operations performed by simple operators in languages like C have a lot more working under
+the hood than you'd think. For example, mathematical operators like '+' or '-' are polymorphic, 
+such that there'll be a conversion from one type to the other. The type of each expression must
+be identifiable at compile time. Also, we must make assumptions about how much space is stored 
+by each type. The author suggests that while defining simple programming languages, you may 
+assume that each type takes up the same amount of space. 
+
+There are two different kinds of polymorphism: ad hoc and parametric, where parametric is more 
+regularly used. Since we must account for the types of both the arguments and the return value 
+in functions, one must need parametric polymorphism. This is heavily used in variable arguments.
+The polymorphism also should communicate its "class" to the compiler. Since all these things are
+happening, the natural consequence is that compilers become complex.  
+
+The whole idea behind pointers is to be able to represent an R-value as a location. Pointers 
+are very useful while working with structures. 
