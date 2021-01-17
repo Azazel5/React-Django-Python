@@ -6,6 +6,11 @@
 #include <netdb.h>
 #include <string.h>
 #include <arpa/inet.h>
+#include <errno.h>
+#include <signal.h>
+#include <unistd.h>
+#include <netinet/in.h>
+#include <sys/wait.h>
 
 /*
  * Everything in UNIX is a file, whether you're talking about network connections, File IO, or even 
@@ -150,6 +155,213 @@ void getaddressinfo_example(char *host_name)
 // Remember: accept returns a new file descriptor, ready for reading and writing, while the older
 // one is busy listening to other connections. If you're only expecting one connection, close
 // the listenening file descriptor.
+
+// Another function (shutdown) exists, which provides finer control over how you're closing the sockets
+// Shutdown makes it so that the socket is unavailable for further reads and writes; to actually close
+// it, you must call close. Another function: getpeername, to get the other end of the connection.
+
+/* Simple client-server program  */
+
+// Server side
+void sigchild_handler(int signo)
+{
+    // waitpid can overwrite errno, so you have to restore it
+
+    int saved_errno = errno;
+    while (waitpid(-1, NULL, WNOHANG) > 0)
+        ;
+    errno = saved_errno;
+}
+
+void *get_in_addr(struct sockaddr *sa)
+{
+    // Returning a pointer to the IP address, no matter whether it's IPV4 or IPV6
+
+    if (sa->sa_family == AF_INET)
+    {
+        return &((struct sockaddr_in *)(sa))->sin_addr;
+    }
+
+    return &((struct sockaddr_in6 *)(sa))->sin6_addr;
+}
+
+int server_main(char *port)
+{
+    int sockfd, newfd;
+    struct addrinfo hints, *res, *ptr;
+    struct sockaddr_storage their_addr; // When there's ambiguity on the other end and you wanna
+    socklen_t addr_len;                 // allocate enough space
+
+    struct sigaction sa;
+    int yes = 1;
+    char s[INET_ADDRSTRLEN];
+    int rv;
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE; // Use my own IP i.e. the server's IP
+
+    if ((rv = getaddrinfo(NULL, port, &hints, &res)) != 0)
+    {
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+        return 1;
+    }
+
+    for (ptr = res; ptr != NULL; ptr = ptr->ai_next)
+    {
+        // Do all the things you wanna do on the first result
+        if ((sockfd = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol)) == -1)
+        {
+            perror("socket(): coudln't create socket");
+            continue;
+        }
+
+        if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
+        {
+            perror("setsockopt: couldn't set options");
+            exit(1);
+        }
+
+        if (bind(sockfd, ptr->ai_addr, ptr->ai_addrlen) == -1)
+        {
+            perror("bind(): coudln't bind the socket");
+            continue;
+        }
+
+        break;
+    }
+
+    freeaddrinfo(res);
+
+    if (ptr == NULL)
+    {
+        // The first pointer was NULL, so we aren't binded to anything
+        fprintf(stderr, "server: failed to bind\n");
+        exit(1);
+    }
+
+    if (listen(sockfd, 10) == -1)
+    {
+        perror("listen(): coudln't listen");
+        exit(1);
+    }
+
+    // Signal handling part
+    sa.sa_handler = sigchild_handler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;
+
+    if (sigaction(SIGCHLD, &sa, NULL) == -1)
+    {
+        perror("sigaction");
+        exit(1);
+    }
+
+    printf("Everything's set; waiting for connections...\n");
+
+    while (1)
+    {
+        // Save their address on the accept call
+        socklen_t addrlen = sizeof(their_addr);
+        newfd = accept(sockfd, (struct sockaddr *)&their_addr, &addrlen);
+
+        if (newfd == -1)
+        {
+            perror("accpet()");
+            exit(1);
+        }
+
+        if (inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), s, sizeof(s)) == NULL)
+        {
+            perror("inet_ntop(): message");
+            exit(1);
+        }
+
+        printf("server: got connection from %s\n", s);
+
+        // Shorthand for child process, as if fork == 0, then it is the child process
+        if (!fork())
+        {
+            close(sockfd);
+
+            if (send(newfd, "Hello World!", 13, 0) == -1)
+                perror("send");
+
+            close(newfd);
+            exit(0);
+        }
+
+        // For parent process
+        close(newfd);
+    }
+
+    return 0;
+}
+
+// Client side
+int client_main(char *hostname, char *port)
+{
+    int sockfd, numbytes;
+    char buf[100];
+    struct addrinfo hints, *servinfo, *ptr;
+    int rv;
+    char s[INET_ADDRSTRLEN];
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+
+    if ((rv = getaddrinfo(hostname, port, &hints, &servinfo)) != 0)
+    {
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+        return 1;
+    }
+
+    for (ptr = servinfo; ptr != NULL; ptr = ptr->ai_next)
+    {
+        if ((sockfd = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol)) == -1)
+        {
+            perror("socket(): client couldn't create socket");
+            continue;
+        }
+
+        if (connect(sockfd, ptr->ai_addr, ptr->ai_addrlen) == -1)
+        {
+            close(sockfd);
+            perror("connect(): client socket couldn't connect to server socket");
+            exit(1);
+        }
+
+        break;
+    }
+
+    if (ptr == NULL)
+    {
+        fprintf(stderr, "Client failed to connect\n");
+        return -1;
+    }
+
+    if (inet_ntop(ptr->ai_family, get_in_addr((struct sockaddr *)&ptr->ai_addr), s, sizeof(s)) == NULL)
+    {
+        perror("inet_ntop(): message");
+    }
+
+    printf("client is connecting to %s\n", s);
+    freeaddrinfo(servinfo);
+
+    if ((numbytes = recv(sockfd, buf, 99, 0)) == -1)
+    {
+        perror("recv()");
+        exit(1);
+    }
+
+    buf[numbytes] = '\0';
+    printf("Client received message from server: %s\n", buf);
+    close(sockfd);
+
+    return 0;
+}
 
 int main(int argc, char *argv[])
 {
