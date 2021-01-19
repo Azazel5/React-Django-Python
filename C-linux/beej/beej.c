@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #include <sys/wait.h>
+#include <poll.h>
 
 /*
  * Everything in UNIX is a file, whether you're talking about network connections, File IO, or even 
@@ -363,8 +364,200 @@ int client_main(char *hostname, char *port)
     return 0;
 }
 
+// If you wanna create the same programs instead for UDP, then you'll simply supply SOCK_DGRAM as
+// an argument. There'll be no need for listen or accept functions since these are unconnected
+// dgram sockets. Again, data sent through UDP connections aren't guaranteed to arrive on the other
+// end. At the same time, you can also create connected datagram sockets.
+
+/* "Advanced" techniques 
+ * ---------------------
+ * Remember that many functions inherently block. Some of the ones you've used which block are accept
+ * or read. When you first make a socket, it's set to block thanks to the kernel: to not block, you
+ * must use fcntl.
+ * Using the poll function is a great way of checking what file descriptors are available for IO 
+ * operations. However, note that this function is horribly slow when there are a huge number of
+ * connections. How does the poll call work? The OS will block until one of the events defined on the
+ * struct pollfd array occurs. 
+ */
+
+void poll_example()
+{
+    struct pollfd pdfs[1];
+
+    // Remember that 0 is standard input
+    pdfs[0].fd = 0;
+    pdfs[0].events = POLLIN;
+    int num_events = poll(pdfs, 1, 2500);
+
+    if (num_events == 0)
+        printf("Poll timed out\n");
+
+    else
+    {
+        int pollin_happened = pdfs[0].revents & POLLIN;
+
+        if (pollin_happened)
+            printf("File descriptor %d is ready for reading\n", pdfs[0].fd);
+        else
+            printf("Unexpected event occurred: %d\n", pdfs[0].revents);
+    }
+}
+
+// The select function also gives a similar functionality to poll. If you wanna keep listening to
+// connections while reading from already available connections, either of these functions are
+// great choices. Select works by having sets of file descriptrs and a timeout struct: if you set
+// the timeout struct fields to 0, select times out immediately and polls all file descriptors in
+// the sets. If you set it to NULL, it will block and wait until the first file descriptor is
+// ready.
+
+void multiperson_chat_using_select(char *port)
+{
+    fd_set master;
+    fd_set read_fds;
+    int fdmax;
+    int listener;
+    int newfd;
+
+    struct sockaddr_storage remoteaddr;
+    socklen_t addrlen;
+    char buf[256];
+    int nbytes;
+
+    char remoteIP[INET6_ADDRSTRLEN];
+    int yes = 1;
+    int i, j, rv;
+
+    struct addrinfo hints, *res, *ptr;
+    FD_ZERO(&master);
+    FD_ZERO(&read_fds);
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET6;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE;
+
+    if ((rv = getaddrinfo(NULL, port, &hints, &res)) == -1)
+    {
+        fprintf(stderr, "selectserver: %s\n", gai_strerror(rv));
+        exit(1);
+    }
+
+    for (ptr = res; ptr != NULL; ptr = ptr->ai_next)
+    {
+        listener = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
+
+        if (listener < 0)
+            continue;
+
+        setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
+
+        if (bind(listener, ptr->ai_addr, ptr->ai_addrlen) < 0)
+        {
+            close(listener);
+            perror("bind()");
+            exit(1);
+        }
+
+        break;
+    }
+
+    if (ptr == NULL)
+    {
+        fprintf(stderr, "selectserver: failed to bind\n");
+        exit(1);
+    }
+
+    freeaddrinfo(res);
+
+    if (listen(listener, 10) == -1)
+    {
+        perror("listen()");
+        exit(1);
+    }
+
+    FD_SET(listener, &master);
+    fdmax = listener;
+
+    for (;;)
+    {
+        read_fds = master;
+
+        // A good strategy is to keep track of the maximum file descriptor, so you can pass in that
+        // fd + 1 as the first argument to select. Here we don't care about writable/exceptable fds,
+        // and we're setting the time to NULL so it will block until the first one becomes availble
+        if (select(fdmax + 1, &read_fds, NULL, NULL, NULL) == -1)
+        {
+            perror("select");
+            exit(1);
+        }
+
+        for (i = 0; i <= fdmax; i++)
+        {
+
+            // If going inside the if block, the read_fd is ready for reading
+            if (FD_ISSET(i, &read_fds))
+            {
+                if (i == listener)
+                {
+                    addrlen = sizeof(remoteaddr);
+                    newfd = accept(listener, (struct sockaddr *)&remoteaddr, &addrlen);
+
+                    if (newfd == -1)
+                        perror("accept");
+                }
+
+                else
+                {
+                    FD_SET(newfd, &master);
+
+                    if (newfd > fdmax)
+                        fdmax = newfd;
+
+                    printf("selectserver: new connection from %s on "
+                           "socket %d\n",
+                           inet_ntop(remoteaddr.ss_family,
+                                     get_in_addr((struct sockaddr *)&remoteaddr), remoteIP, INET6_ADDRSTRLEN),
+                           newfd);
+                }
+            }
+            else
+            {
+                if ((nbytes = recv(i, buf, sizeof buf, 0)) <= 0)
+                {
+                    if (nbytes == 0)
+                        printf("selectserver: socket %d hung up\n", i);
+
+                    else
+                        perror("recv");
+
+                    close(i);
+                    FD_CLR(i, &master);
+                }
+
+                // Successfully read some data from a client, so we'll send it to everyone
+                else
+                {
+                    for (j = 0; j <= fdmax; j++)
+                    {
+                        if (FD_ISSET(j, &master))
+                        {
+                            if (j != listener && j != i)
+                            {
+                                if (send(j, buf, nbytes, 0) == -1)
+                                    perror("send");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Damn, that was a hell of a function. The reason why there are two sets of file descriptors is
+// that the call to select changes them, so you must save the master safely elsewhere. 
+
 int main(int argc, char *argv[])
 {
-
     return 0;
 }
