@@ -555,7 +555,39 @@ void multiperson_chat_using_select(char *port)
 }
 
 // Damn, that was a hell of a function. The reason why there are two sets of file descriptors is
-// that the call to select changes them, so you must save the master safely elsewhere. 
+// that the call to select changes them, so you must save the master safely elsewhere.
+// On a different note, the call to any read/recv may be split up into portions because there's a
+// limit. To handle these instances, you have to understand how data serialization works. Beej
+// recommends finding a library or two which does this encoding/decoding process for you. For example,
+// the functions you know and love, htonl, ntohl, ....
+
+// If you're constructing your own packets, store binary integers in network byte order. Check if
+// on every call to recv, you've reached the number of bytes read (until the byte size specified on
+// the header). Once you're done, you've read the entire packet. If the packets got merged i.e. you
+// read past one and a little bit of the second packet in one read call. For that, you're gonna have to
+// do a bit of subtraction, remove that first packet from the buffer, and move the second packet to the
+// front of the buffer, so the next recv call can build upon it. This moving up and down of the buffer
+// can be implemented relatively easily with a circular buffer.
+
+// Broadcasting can be used to send data to multiple hosts at the same time by setting the socket
+// option to be SO_BROADCAST (when you set it to be reuseable). So what exactly is the destination
+// address in this case? For the chat server program you wrote, you basically looped through the list
+// of connected clients, and sent them messages one at a time, but this is different. Here, you have
+// two options: send data to subnet broadcast address or to global broadcast address.
+
+/* General tips section */
+
+// Signals tend to cause blocked system calls, such as accept or select to return -1 and set errno.
+// Handle this by creating a custom signal handler using sigaction.
+
+// If you want a timeout on reading/writing operations, use select, which allows you to specify
+// whatever timeouts you want for either sets of file descriptors.
+
+// A return value of 0 on a recv means that the remote side has closed the connection.
+
+// If you wanna compress/encrypt, the strategy is to compress first, then encrypt.
+
+/* The rest of the book is Beej's own man pages, specifically geared towards networking */
 
 int main(int argc, char *argv[])
 {
