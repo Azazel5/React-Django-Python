@@ -1,0 +1,11 @@
+This paper attempts to discuss affective computive from the perspective of emotions. Given how important
+emotions are to humans, it should be no surprise that these intelligent systems should be able to 
+understand emotions to some degree.  This is not to say that computers should actually have emotions 
+because that would be a disaster. The author is pushing for computing which arises from, or influences 
+emotions. The author gives a great example of how emotionally voltile people can be, particularly in 
+relation to one's behavior to the other. My own example would be: 
+    if you keep getting interrupted while speaking by the same guy, and it happens again for the 
+    third time, your reaction will be dependent on whether the guy apologizes this time (at the 
+    very least) or just carries on nonchalantly. For the former case, you may call out the guy in 
+    a fit of anger and in the latter case, you may be a little more forgiving. 
+
