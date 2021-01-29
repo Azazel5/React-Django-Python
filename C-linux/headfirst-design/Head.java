@@ -130,13 +130,13 @@ interface DisplayElement {
 }
 
 class WeatherData implements Subject {
-    private ArrayList observers;
+    private ArrayList<Observer> observers;
     private float temp;
     private float humidity;
     private float pressure;
 
     public WeatherData() {
-        observers = new ArrayList();
+        observers = new ArrayList<Observer>();
     }
 
     @Override 
@@ -152,7 +152,7 @@ class WeatherData implements Subject {
     @Override 
     public void notifyObservers() {
         for (int i = 0; i < observers.size(); i++) {
-            Observer observer = observers.get(i);
+            Observer observer = (Observer) observers.get(i);
             observer.update(temp, humidity, pressure);
         }
     }
@@ -173,7 +173,7 @@ class CurrentConditionsDisplay implements Observer, DisplayElement {
     private float temp;
     private float humidity;
     private float pressure;
-    private Subject weatherData;
+    Subject weatherData;
 
     CurrentConditionsDisplay(Subject weatherData) {
         this.weatherData = weatherData;
@@ -181,7 +181,7 @@ class CurrentConditionsDisplay implements Observer, DisplayElement {
     }
     
     @Override 
-    void update(float temp, float humidity, float pressure) {
+    public void update(float temp, float humidity, float pressure) {
         this.temp = temp;
         this.humidity = humidity;
         this.pressure = pressure;
@@ -189,7 +189,7 @@ class CurrentConditionsDisplay implements Observer, DisplayElement {
     }
 
     @Override
-    void display() {
+    public void display() {
         System.out.println("Current conditions: " + temp + "F degrees, " + humidity + " humidity, and " + pressure + " pressure");
     }   
 }
@@ -235,7 +235,7 @@ abstract class Beverage {
     String description = "Unknown Beverage";
 
     public String getDescription() {
-        return described;
+        return description;
     }
 
     public abstract double getCost();
@@ -258,10 +258,10 @@ class Espresso extends Beverage {
 
 class HouseBlend extends Beverage {
     public HouseBlend() {
-        description = “House Blend Coffee”;
+        description = "House Blend Coffee";
     }
 
-    public double cost() {
+    public double getCost() {
         return .89;
     }
 }
@@ -278,7 +278,7 @@ class Mocha extends CondimentDecorator {
     }
 
     public double getCost() {
-        return .20 + beverage.cost(); 
+        return .20 + beverage.getCost(); 
     }
 }
 
@@ -313,6 +313,7 @@ class Mocha extends CondimentDecorator {
  */
 
 // A simple PizzaFactory 
+/*
 class SimplePizzaFactory {
     public Pizza createPizza(String type) {
         Pizza pizza = null;
@@ -323,6 +324,7 @@ class SimplePizzaFactory {
         return pizza;
     }
 }
+*/
 
 /**
  * Using the factory is simple, just create a factory reference and initialize it in the class's 
