@@ -1,0 +1,43 @@
+This paper has to do with wireless mesh networks, which means an interconnection between many nodes.
+The nodes themselves can be laptops, mobile phones, or anything. Usually, text/audio chat apps
+use a central server for the architecture, which cannot be used in mesh networks. Although these
+challenges are prevalent, there are still ways to go around them, which the authors have done 
+by prototyping a chat application.
+
+The general features of an app like this is:
+1. Processing challenges
+2. Inviting new members 
+3. Audio/Video transmission
+
+For dynamic functionality while using WMNs, there are additional features to think about as compared
+to its static counterpart. The paper describes splits and merges of networks in WMNs, so there's 
+packet loss. Since we're talking about mobiles phones here (mobile clients), disconnections in 
+networks is a very possible event. This could also mean changes in the IP addresses allocated to 
+the devices, another problem which the authors will address. The authors listed the following 
+requirements as non-negotiable elements for this app:
+
+• Automatic discovery and monitoring of on-line nodes
+• Fast and reliable chat-group management
+• IP change during group chatting
+• Client-side group voice mixing
+• Group video processing
+• Scalability 
+
+When users create a group, a unique ID is attached to it. The app constantly monitors active groups 
+to make sure that a new group will have a unique ID. All nodes send "heartbeat messages" after 
+connection to a group; if the node isn't a part of the group, it will send a simple "HELLO" message.
+For inviting a new member, group members send out join_request, and the node getting requested sends
+back a yes/no response. If yes, the sender adds the recipient and sends the updated list to all other 
+members. If a node leaves the group, the members are notified as well. If an IP change is detected
+via the heartbeat messages, the new IP is used. 
+
+The user interface package is pretty self-explanatory, as it's the GUI for users. Less obvious is 
+the need for a data handling library, which performs the tedious, yet important tasks, such as 
+audio/video encoding/decoding, audio buffer management, and video index management. The constant 
+irregular data transmissions calls a need for a queue in terms managing who's output is coming 
+out when. It follows a FIFO format with the added check of user status i.e. whether or not the 
+user is idle. The point of video indexing is to specify which part of the screen holds the user 
+and whether the user has video chat as on. 
+
+The research found that group leader nodes had less CPU load as they send out lesser messages 
+as compared to other group member nodes. 
