@@ -1,0 +1,45 @@
+This paper talks about how the authors prototyped a larger scale video chat application (as compared
+to Misun), which also has chat functionalities. The app is judged using bandwidth as a metric; 
+specifically, it uses the user's perception of bandwidth under 3 different schemes. Since the
+available bandwidth has to be shared between users, delivering high quality video to everyone 
+in a large group remains a challenging idea. There's also the problem of view navigation.
+Imagine if you have 50 people in a group. Zoom handles this by splitting the screen into 50 equal
+parts, and highlights the person speaking currently (if in gallery mode). Else, if in the speaker
+mode, the speaker gets the prime screen real-estate. 
+
+According to the authors, we can leverage the leaps taken in the field of video coding/data 
+transmission, equal bandwidth sharing, and tweaking compression parameters/lowering frame rates.
+If you lower frame rates, there's lesser frames to encode/decode + saves bandwidth, but isn't 
+something you can exploit all the time. So, what exactly is the minimum bandwidth you can get
+away with having? Video chat is synchronous just like video conferencing (by video conferencing,
+the paper means watching the video while listenening to audio at the same time), but there 
+are important differences to think about. The paper's opinion is that basic presence and recognition
+of emotion is important to people for video chat. They use other research (such as showing people
+clips of emotions) and deduced frame rates of each type of information; the latter was much more 
+blurry/complex than the former because it takes more time for people to convey more complex 
+emotions like interest, confusion, etc.   
+
+We can also explore other paradigms for bandwidth, such as unequal bandwidth sharing. An example 
+could be that the system allocates more resources to certain people that they deem "more important"
+than the others. The authors were interested in exploring these schemes because this could mean 
+the solution to the problem of having many group members. The client side application that they
+developed worked like this - just like Zoom's speaker screen, there's one large screen and multiple
+smaller screens, but whenever a user clicks on another screen, that screen should become the 
+primary focus. If multiple users have clicked on a particular user, the app determines that that 
+user is more important and allocates more resources for them. Unimportant senders proactively 
+reduce their own frame rates when they realize that they aren't being seen by other users and 
+important senders reactively increase their own rate to fill the gap. 
+
+What I discussed above about how Zoom automatically focuses on the currently speaking user is 
+called "video follows audio", but it, of course, has problems like ambient noise may cause 
+switches, which happens all the time. Another paradigm is "video follows chat", which causes 
+a user to come into focus whenever he sends a message in the chat. The problem is already 
+see with this is when people are chatting a lot: will there be a constant switch in windows? It 
+might become tedious. However, there are 2 more questions posed by the authors:
+
+1. Should the screen switch when a user starts typing or after?
+2. Should a user see his own screen after sending a message?
+
+Emotional expression is more likely after sending a message + watching people type is plain boring.
+
+

@@ -1,0 +1,45 @@
+This book is all about software development and is all practicality; there are more than 500 examples in 
+different languages. There are many different stages of software development, everything from 
+requirement analysis, user interface design, ... but the most important of all stages is construction:
+actual coding and debugging. This book focuses on this, with minor parts of detailed design and 
+unit testing.
+
+Plan ahead and extensively to produce good quality software, as it has been shown by numerous studies 
+time and again. Actually take the time to define your problem in "user language" and try not making it
+technical. Now you're eligible to think about requirements prerequisites. Requirements should be ideally
+frozen i.e unchanging and stable. However, users do not typically know every feature/thing that is needed
+of the product. Thus, a change in requirements is often expected. but the main point is how you handle
+it. Check if the requirements are viable and totally communicate all changes to your fellow developers
+and users alike (mention scheduling and costs to a feature-intoxicated user to sober them up real quick).
+
+Now we move on to architecture, which is the most high-level look out of all other stages. Good 
+architecture makes construction easy. Always remember the house analogy: if you're building a house, 
+you wouldn't not follow detailed blueprints and proper architecture. During this phase, the author
+states that you must make clear the structure of the program, such that all relevant modules are defined.
+The modules are not simple functions, but rather a collection of them i.e. packages, classes, etc. 
+After this, you should think about the change strategy: is what you have currently flexible enough 
+to widthstand new changes? The architectural choices made should be weighed against one another, 
+whether alternatives were considered at all. Major data structures, files, and tables should be 
+described. Any key algorithms used should also be discussed. Follow the law of conservation of data:
+if the data isn't going out or being involved in some other data, it doesn't need to come in. There
+are many other things to think about in this stage, such as strings, error processing, other libraries
+used, extreme cases/memory management, etc. Finally, also establish programming conventions in this 
+document. 
+
+When writing a function, use program design language (PDL) to provide high level concepts of what the
+function does as comments. Avoid using technical jargon here as it is unneeded. Make sure you're 
+not commenting on whether you return 0 or 1: that is obvious to anyone! High level is your friend 
+here - what actually are you achieving with this routine? The approach this book takes is writing 
+out the entire PDL and then building the code upon it, one statement at a time. Examine the place 
+of each line of code in the function's results. 
+
+Have you ever tried to think about some valid reasons of why to create a function? Of course you 
+want code reuse, but there are other reasons why you'd do so as well. Reducing complexity for 
+example. If you see something being deeply nested or conditionalized, that is a good candidate 
+for a sub-routine. You can also isolate out areas which are more likely to change, for example 
+the stateful/stateless components in React. There's a wide array of reasons listed in the book,
+but the song remains the same: use functions and use them judiciously. 
+
+When naming functions that return a value, adding a brief description of what it returns in the 
+function name is a good practice. Make functions cohesive, in that make sure it does one thing.
+The sin function is cohesive, but the sinAndTan function is less so.
