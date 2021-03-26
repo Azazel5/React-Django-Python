@@ -331,6 +331,130 @@ class SimplePizzaFactory {
  * constructor and call the createPizza method. Right now, all you've done is move the code to
  * another class, but it still gives you some benefits, such as reusability of the factory in other
  * areas of the application. There's still more to come though. 
+ * How can you "franchise" this pizza factory? We want to use the PizzaStore code (which initializes
+ * the simple factory in the constructor), but we also want there to be certain additions you can 
+ * make such as NYStylePizza or ChicagoStylePizza.
+ * Well, we can simply get rid of all this factory pattern and create two different factories of styles
+ * of pizza. 
  * 
+ * NYPizzaFactory nyFactory = new NyPizzaFactory();
+ * PizzaStore nyStore = new PizzaStore(nyFactory);
+ * 
+ * and so on
+ * 
+ * A better way of formulating the problem is that you'd like to standardize store and pizza creation,
+ * but allow flexibility for differences in the pizza themselves. You could make createPizza an 
+ * abstract method such that every subclass must re-implement it. Thus, we're gonna have NYPizzaStore, 
+ * ChicagoPizzaStore, .... With this, the factory remains consistent, but we'll have different 
+ * subclasses of PizzaStore which will override the createPizza method. From the point of view of 
+ * the orderPizza function, there a lot of decoupling because it has no idea which pizza is coming into
+ * it, as the style of pizza is created in the store subclasses. 
+ * 
+ * In other words, what the factory pattern really does, is handles object creation and encapsulates
+ * it in a concrete subclass. So, with our implementation, we order a pizza like this: 
+ * PizzaStore ny = new NyPizzaStore();
+ * ny.orderPizza("cheese");
+ * Inside the orderPizza function, the if block for cheese runs, and we get
+ * Pizza pizza = createPizza("cheese"), which returns a NyCheesePizza
+ * 
+ * We can make Pizza itself an abstract class, which the concrete child classes which inherit
+ * (such as NyCheesePizza). You can override the cut/bake/whatever functions in the child 
+ * classes if you want the pizza to be different from default behavior; for example, if 
+ * a particular pizza subclass wants the pizza to be cut into squares, which is different 
+ * from the default behavior. 
  */
 
+/**
+ * Finally, we're ready for the official factory pattern! The creator method/class should never 
+ * know what concrete class is being creator for you to reap the benefits of this pattern. You
+ * can also think of this as parallel class hierarchies. The Store and Product are both abstract 
+ * and are extended by a bunch of concrete classes, such as ChicagoStore and ChicagoDeepDishPizza for 
+ * example. All products must implement the interface so classes which use products can simply 
+ * refer to the interface rather than the concrete class. A class having to depend on many concrete 
+ * classes is bad design! Object instantiation is a dependency. 
+ * 
+ * Design principle: Depend on abstractions, not concrete classes
+ * This will allow you use dependency inversion principle: instead of 
+ * A -> B; A -> C;... we will have A <- B; A <- C;....
+ * A high level component is one that is composed of many low level components. Both should depend
+ * on abstractions. 
+ * 
+ * Here are a few tips:
+ *  1. Don't hold references to concrete class: you're depending on it! Move it to a factory.
+ *  2. No class should derive from a concrete type: derive from an interface or abstraction
+ *  3. Implemented methods in the base class shouldn't be overriden. This makes sense because
+ *     if you're overriding it, it doesn't make sense to put it in the base class. However, I 
+ *     have a confusion about this. What if only one subclass wants to override it and the other 
+ *     99 don't (kind of like the "cut" method described above)? In my personal opinion, that would
+ *     be okay, but I guess we will find out soon. 
+ * 
+ * The book does address this question by saying that these are guildelines and not rules. Use 
+ * your own judgement! Moving on with the pizza franchise, what if you want to implement 
+ * ingredients too, but you want it to be standardized. Not only that, you know that one 
+ * ingredient may be used differently in a different region i.e. same component, different 
+ * implementation. 
+ */
+
+/**
+ * interface PizzaIngredientFactory {
+        Dough createDough();
+        Sauce createSauce();
+        Cheese createCheese();
+        Veggies[] createVeggies();
+        Pepperoni createPepperoni();
+        Clams createClams();
+    }
+ *
+ * Thus, we're gonna create factories implementing this interface for each region, which'll
+ * override all these methods. Then we will create the ingredient classes for each region.
+ * Here's an example of NewYorkIngredients:
+ * 
+ * class NewYokIngredients implements PizzaIngredientFactory {
+        Dough createDough() {
+            return new ThinCrust();
+        }
+
+        Sauce createSauce() {
+            return new MarinaSauce();
+        }
+
+        Cheese createCheese() {
+            return new RegianoCheese();
+        }
+
+        Veggies[] createVeggies() {
+            Veggies[] veggies = {new Onion(), new Tomato(), new Mushroom()};
+            return veggies;
+        }
+
+        Pepperoni createPepperoni() {
+            return new SlicedPepperoni();
+        }
+
+        Clams createClams() {
+            return new FreshClams();
+        }
+ * }
+ * 
+ * With this, each franchise branch will be able to have different implementations of ingredients
+ * if they want. For example, New York has fresh clams, but Chicago may not be able to get them. So
+ * the ChicagoFactory will return FrozenClams(). This solidifies the benefit of interfaces and abstract
+ * classes. Any client using the IngredientFactories will only need the interface: no implementation 
+ * details required here!
+ * 
+ * To implement this into our existing pizza factory, we can add an abstract method, just like createPizza.
+ * We already know that each concrete pizza type implements the Pizza interface, so it should override 
+ * the prepare method. We will instantiate an Ingredient factory here and add it in the constructor. 
+ * Since this derived class will inherit variables like dough, cheese, etc, we will save them and 
+ * call the create functions for each. 
+ * clam = ingredientFactory.createClam(), will return FrozenClam if the ingredientFactory is Chicago's
+ * and fresh if the factory is New York's. The stores themselves don't require much changes; the only
+ * thing is that each store will create the particular ingredient factory and pass it to the concrete
+ * pizza class's constructor.
+ * 
+ * aaand we're done with the abstract factory pattern. There are differences between the factory 
+ * pattern (one product) and the abstract factory pattern (families of products). Factory method
+ * relies on inheritance: object creation is left to subclasses which implement the factory method.
+ * Abstract factory uses object composition: these objects are created in the factory method of the 
+ * abstract factory.  
+ */
