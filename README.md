@@ -8,6 +8,9 @@ Each invidual folder is a small project, tutorial, or notes on documentation whe
 Each folder is its own project, and it contains a text file which lists the project requirements.
 Here's a general overview of each project and some new things I learnt during the process
 
+* LearningScrapy - Going through the Learning Scrapy book to gain a full understanding of the scraping
+framework
+
 * Research-Papers - Reading good, peer-reviewed research papers to see what is going on in the technology landscape.
 
 * C-Linux - A collection of C and linux books I have read through and written code on. The goal of this is to learn completely new concepts which I have only scratched the surface on through my operating systems class. <br> New things learnt - Memory management, UNIX system, multi-threading, and low-level IO  <br>

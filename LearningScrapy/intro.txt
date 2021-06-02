@@ -1,0 +1,41 @@
+HTML and XPATH 
+--------------
+
+When a person goes to a website, what happens? First of all, the domain name is used to reach the server on
+which the website is hosted (uses the DNS to do this). The server returns HTML, JSON, XML, or other responses; if it is HTML, it 
+gets drawn on the browser via the Document Object Model (DOM). The HTML you write is texual, but the 
+DOM view you see in most major browsers are objects loaded into its memory, which can be manipulated.
+
+Xpath is a great selector to use because we can directly select elements from the DOM, according to 
+hierarchy. In chrome developer tools, the $x function can be used to select from xpath. Example -
+$x('//h1'), the h1 element (this function returns an array). The // syntax can be used to find elements
+no matter where they are. To find any links in divs, we can use the '//div//a' xpath. Selecting via
+attribute - '//a[@href]', text(), or all elements by * - '//p/*'. 
+
+There are functions like starts-with, ends-with, contains, etc to select elements with attributes. To
+check out a website with the scrapy shell, do scrapy shell https://website.com. Through this, we have 
+access to the response object, which can be used to analyze the website. You can even combine xpath 
+functions with boolean conditions like "and". 
+
+Basic Crawling
+--------------
+
+Remember the UR^2IM method: urls, request, response, items, and more url. Debug problems with the shell 
+using the --pdb argument. If you simply select elements containing text such as <p> or <h1> tags, it is 
+a good practice to add the text() property at the end of the xpath to avoid extracting the HTML text 
+itself. 
+
+Reminder: Xpath starts indexing from 1!
+
+You can chain the xpath and css functions together if you wish. The fact that we declare a field in
+items.py isn't a guarantee that we're gonna find/use it in each spider or at all. The author also 
+recommends adding a couple housekeeping fields which are helpful, espcially while debugging. After 
+defining the items, we can move on to the spiders directory, where you can create all the spiders in
+the project. You can also save your output into any file formats by specifying the -o file.ext
+parameter. Also, scrapy can save the outputs to someplace other than your computer using the -o
+file_path_and_ext argument. 
+
+Processors are basically higher order functions which you can use to manipulate the results you get 
+back from the website. Important ones include: Join, MapCompose, etc. You can hardcode which links 
+to pass to the spider and also open a file, read its lines, and start scraping; however, the most 
+exciting thing is that you can make scrapy use the website's pagination system to move forward too. 
