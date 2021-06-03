@@ -1,7 +1,6 @@
 import scrapy
 import datetime
 import socket
-from scrapy.http import Request
 from urllib.parse import urljoin
 from scrapy.loader import ItemLoader
 from properties.items import PropertiesItem

@@ -62,9 +62,14 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'properties.pipelines.PropertiesPipeline': 300,
-#}
+ITEM_PIPELINES = {
+   'scrapyapperyio.ApperyIoPipeline': 300,
+}
+
+APPERYIO_DB_ID = '60b8d6490f0d3110c78b7793'
+APPERYIO_USERNAME = 'root'
+APPERYIO_PASSWORD = 'pass'
+APPERYIO_COLLECTION_NAME = 'properties'
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

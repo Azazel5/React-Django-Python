@@ -47,3 +47,10 @@ You can add an argument -s CLOSESPIDER_ITEMCOUNT=90 to limit the number of items
 send out multiple requests, accumulate them all using the yield generator and the scrapy.http Request 
 object and pass it into a helper parsing method; this working because the parsing method takes in a 
 single response object, which'll be called sequentially.
+
+From Scrapy to a mobile app 
+---------------------------
+
+Through Scrapy we can also easily specify where we want to store data; for example, if we have a 
+deployed database url on the cloud, we can specify its database column names, such as how we did 
+it with Appery.io in the book. 
