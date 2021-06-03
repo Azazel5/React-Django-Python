@@ -39,3 +39,11 @@ Processors are basically higher order functions which you can use to manipulate 
 back from the website. Important ones include: Join, MapCompose, etc. You can hardcode which links 
 to pass to the spider and also open a file, read its lines, and start scraping; however, the most 
 exciting thing is that you can make scrapy use the website's pagination system to move forward too. 
+
+Yield is a great keyword to know about! In all your years of coding, you've seen many instances where
+you had to define a list and then append stuff to it in a for loop. This could easily be done 
+with a yield, which is like return, but it doesn't cause the code to exit out the function/script. 
+You can add an argument -s CLOSESPIDER_ITEMCOUNT=90 to limit the number of items scraped. If you wanna
+send out multiple requests, accumulate them all using the yield generator and the scrapy.http Request 
+object and pass it into a helper parsing method; this working because the parsing method takes in a 
+single response object, which'll be called sequentially.
