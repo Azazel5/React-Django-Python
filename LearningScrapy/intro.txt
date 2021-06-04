@@ -54,3 +54,30 @@ From Scrapy to a mobile app
 Through Scrapy we can also easily specify where we want to store data; for example, if we have a 
 deployed database url on the cloud, we can specify its database column names, such as how we did 
 it with Appery.io in the book. 
+
+Quick spider recipes
+--------------------
+
+This chapter, although very interesting, won't be followed by me because I didn't set up the virtual 
+machine in the beginning, so I cannot access the web:/dynamic link. Instead, I'll just read through 
+it and write down interesting aspects here. After a successful post request with valid usernames and 
+passwords, the server usually response with a 302 found status code and redirects the user agent 
+to a new link. Servers only assign cookie values after succesful logins, so you don't receive 
+responses on API requests without authentication. The relationship is as follows:
+server sends my browser a cookie on a login -> on each subsequent request the browser sends it back
+to identify us 
+
+Instead of simple start_urls, we can also choose to have a more complex start_requests function. 
+Scrapy is awesome at passing cookies around; I assume, under the hood, it's doing something similar 
+like "with requests.Session()" or something like that. After a login, we can simply copy the rules 
+and parsing method we had in our other spiders. Some websites also have hidden input fields assigned 
+on login, which is needed for the post request to be successful. To handle this, we can return a 
+Request in the start_urls function and handle it using the FormRequest's from_response function.
+
+Now, we finally arrive at the long awaited portion of this book. How do we handle websites using 
+APIs and AJAX using scrapy? APIs are pretty straightforward, as you use the json loads function,
+parse whatever it is you want, and send further Requests if you so wish. You can also pass 
+arguments between responses. You can pass stuff you find from the API as a meta tag and retrive it
+in the callback function. Sometimes, websites will have context nodes, which are lists of xpath 
+expressions. Using these may reduce the number of requests you send out. The sibling elements 
+are selected with a . before each query, as in .//*[@class="blah"]. 
