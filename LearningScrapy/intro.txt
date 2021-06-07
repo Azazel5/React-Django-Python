@@ -89,3 +89,56 @@ to the item_loader manually by creating an item object. In scrapy, you can pass 
 arguments using the -a argument in this fashion:  scrapy crawl fromcsv -a arg1=val. Accessing of 
 values can be done by the getattr python function through which we can also specify default values 
 when the argument isn't passed. 
+
+Deploying to scrapinghub 
+------------------------
+
+Scrapinghub is a great resource for deploying spiders; there's a free tier which you can use without 
+any payment headaches! 
+
+Configuration and Management
+----------------------------
+
+Alongside each scrapy project's default settings file, we can also specify settings for each spider. 
+Also, we can use the -s command to specify last minute commands, such as when we limited the scraped 
+items count to 90 earlier. 
+
+Scrapy also features a telnet console which may be used to look at the running scrapy instance's 
+internals. If you have telnet installed, using the command "telnet localhost portno" will open
+the above stated instance, where you could run commands like est(). You could even pause crawls
+from here! Concurrent requests are the total requests doable depending on how long one request
+takes for your system. For example, if one request takes 0.5 seconds and CONCURRENT_REQUESTS = 16,
+your request limit is 16 / 0.5 = 32 requests per second. 
+
+There are other ways to stop crawls early, such as -s CLOSESPIDER_ITEMCOUNT, CLOSESPIDER_PAGECOUNT,
+or CLOSESPIDER_TIMEOUT. Scrapy also has a caching mechanism disabled by default, which can be enabled
+via the HTTPCACHE_ENABLED = True. Also you can specify which databased to store those cached files in.
+If you run it with the cache option, scrapy creates a new .scrapy directory to hold all things cache.
+Long story short, scrapy gives developers tons of flexibility. 
+
+As we've seen, scrapy utilizes a depth first philosophy, which can be changed to breadth first if you 
+so desire. Example - if you're trying to scrape a news website, you might want to scrape top level,
+more recent news first, which would ask for a breadth first strategy. 
+
+You can use scrapy feeds if you want whatever you scraped to be sent to a local filesystem or a remote 
+webserver. You can specify the FEED_URI or FEED_FORMAT to let scrapy know where the data is going and
+what format it's in. 
+
+Using scrapy to download media? Yes, it can be done. Images can be saved anywhere using the methods 
+discussed above or you can give it a relative path, so it is saved to the project directory. It is
+amazing how many options there are! You could filter out images by their size and also determine
+how many days until the images get deleted. You could also download files using the same methodology.
+To use image/file pipelines, add it to the settings page. 
+
+Proxies? Easy. First choose a free proxy and check if it is valid by looking through HMA's public proxy
+list. Export an environment variable http_proxy=1.1.2.3:9000 and start sending requests through that IP.
+There's also a service called Crawlera (made by the people who created scrapy itself) which is worth
+looking into. They use network techniques alongside a large pool of IP addresses to hide your scraper:
+the best part is that you can use the same environment variable alongisde your Crawlera username and
+account i.e. export http_proxy=myusername:mypassword@proxy.crawlera.com:8010
+
+You can customize scrapy settings by using ITEM_PIPELINES or COMMANDS_MODULE. As always, you can extend 
+a class, overload some functions, and slap your new custom class onto settings (like you'd do in Django),
+but you better know what you're doing in that case. There's a lot of options that scrapy provides, even 
+for something as basic as redirects; it is extremely detailed, as you could set redirect priorities or 
+max number of redirects. Exploring all these settings and this framework will take time and many projects.
