@@ -81,3 +81,11 @@ arguments between responses. You can pass stuff you find from the API as a meta 
 in the callback function. Sometimes, websites will have context nodes, which are lists of xpath 
 expressions. Using these may reduce the number of requests you send out. The sibling elements 
 are selected with a . before each query, as in .//*[@class="blah"]. 
+
+What about a spider that crawls based on an Excel file? This would be useful if you have several 
+similar types of websites, which only differ in Xpath. You could create columns which hold the 
+xpaths. In the code for this spider, we don't define fields in items.py, but we rather pass them 
+to the item_loader manually by creating an item object. In scrapy, you can pass command line 
+arguments using the -a argument in this fashion:  scrapy crawl fromcsv -a arg1=val. Accessing of 
+values can be done by the getattr python function through which we can also specify default values 
+when the argument isn't passed. 

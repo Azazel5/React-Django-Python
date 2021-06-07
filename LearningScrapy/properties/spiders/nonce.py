@@ -10,8 +10,8 @@ from itemloaders.processors import MapCompose, Join
 from scrapy.http import Request, FormRequest
 
 
-class LoginSpider(CrawlSpider):
-    name = 'login'
+class NonceSpider(CrawlSpider):
+    name = 'nonce'
 
     def start_requests(self):
         return [Request("http://web:9312/dynamic/login", callback=self.parse_welcome)]

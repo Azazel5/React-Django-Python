@@ -7,8 +7,8 @@ from properties.items import PropertiesItem
 from itemloaders.processors import MapCompose, Join
 
 
-class ManualSpider(scrapy.Spider):
-    name = 'manual'
+class FastSpider(scrapy.Spider):
+    name = 'fast'
 
     start_urls = [
         'https://www.gumtree.com/flats-houses/london'
