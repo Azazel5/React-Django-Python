@@ -142,3 +142,24 @@ a class, overload some functions, and slap your new custom class onto settings (
 but you better know what you're doing in that case. There's a lot of options that scrapy provides, even 
 for something as basic as redirects; it is extremely detailed, as you could set redirect priorities or 
 max number of redirects. Exploring all these settings and this framework will take time and many projects.
+
+Programming Scrapy 
+------------------
+
+Do not, under any circumstances, write code that blocks!!
+
+Twisted, what scrapy is based upon, prefers utilizing a single thread for operations, unlike multithreading.
+If there's a blocking operation, such as writing to a database, Twisted returns a hook to it. There's a 
+deferred callback for that hook such that, whenever the operation is completed, the hook will be called, 
+and there's no reason for any blockage of the main thread. 
+
+This chapter demonstrates that configuring scrapy to suit your own needs is pretty straightforward business:
+you could modify your spider, write an item pipeline, write a spider middleware, write a download middleware, 
+or an extension. A use case of a pipeline could be - if you spiders provide crawl date in Python format and 
+you want to save it as a string, you could write a pipeline to convert them all for you rather then change 
+all your spiders' settings. All you need to do is to create a class with a process_item function. After 
+this you should set your ITEM_PIPELINES in the settings.
+
+Pipeline Recipes 
+----------------
+
