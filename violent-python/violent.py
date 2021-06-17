@@ -1,8 +1,12 @@
+#####################################################################
+# Chapter 1
+#####################################################################
+import nmap
 import crypt
-import socket
 import zipfile
 import optparse
-from threading import Thread
+from socket import *
+from threading import Thread, Semaphore
 
 
 def banner_and_service_example():
@@ -151,5 +155,101 @@ def main_zip():
 
     pass_file.close()
 
+#####################################################################
+# Chapter 2
+#####################################################################
 
-main_zip()
+# Check the system and its vulnerabilities before choosing exploits.
+# Now, we'll scan target hosts for open TCP ports. Most applications
+# use TCP (TCP: 80, email: 25, FTP: 21, ...). To connect to any of
+# these we need the IP address and the service port. We need to
+# port scan! We can send TCP SYN packet and wait for responses,
+# signalling an open port (is this called a ping?). Another form
+# of this is a full 3-way handshake. We will choose to write the latter.
+
+
+def handshake():
+    parser = optparse.OptionParser('usage %prog –H' +
+                                   '<target host> -p <target port>')
+
+    parser.add_option('-H', dest='tgtHost', type='string',
+                      help='specify target host')
+    parser.add_option('-p', dest='tgtPort', type='string',
+                      help='specify target port(s), seperated by commas')
+
+    options, _ = parser.parse_args()
+    tgtHost = options.tgtHost
+    tgtPorts = str(options.tgtPort).split(', ')
+
+    if (tgtHost == None) | (tgtPorts[0] == None):
+        print(parser.usage)
+        return
+
+    port_scan(tgtHost, tgtPorts)
+
+
+screenLock = Semaphore(value=1)
+
+
+def conn_scan(host, port):
+    try:
+        conn_sock = socket(AF_INET, SOCK_STREAM)
+        conn_sock.connect((host, port))
+
+        # After connection, we know that a port is open, so we can send some data
+        # and wait for a response
+        conn_sock.send(b'Violent Python')
+        results = conn_sock.recv(100)
+
+        screenLock.acquire()
+        print("tcp open in port {}".format(port))
+        print("Got some results AKA " + str(results))
+
+    except Exception as e:
+        screenLock.acquire()
+        print(e)
+
+    finally:
+        screenLock.release()
+        conn_sock.close()
+
+
+def port_scan(host, ports):
+    try:
+        target_ip = gethostbyname(host)
+    except:
+        print("Cannot resolve unknown host")
+        return
+
+    try:
+        target_name = gethostbyaddr(target_ip)
+        print('\n[+] Scan Results for: ' + target_name[0])
+    except:
+        print('\n[+] Scan Results for: ' + target_ip)
+
+    setdefaulttimeout(1)
+    for port in ports:
+        t = Thread(target=conn_scan, args=(host, int(port)))
+        t.start()
+
+# The scanning of sockets should be done in a threaded manner, which is super simple
+# using the threading module as you've done before. However, there's a disadvantage:
+#         t = Thread(target=conn_scan, args=(host, int(port)))
+#         t.start()
+# Simply doing this will jumble up execution order. Imagine if you're outputting
+# something to the terminal - disaster!!
+# Use semaphores to rescue you from this situation.
+
+# Although the above example was fun to work though, it is limited in the sense that 
+# it only uses handshake scanning, while you may very well want to use others as well.
+# Enter, nmap-python.
+
+def nmap_scan(host, port):
+    nm = nmap.PortScanner()
+    nm.scan(host, port)
+    state = nm[host]['tcp'][int(port)]['state']
+    return state 
+
+# Let's try to create our own SSH worm. We will use the Pexpect moduel, which can be 
+# used to monitor and interact with programs, making it a good choice to work with 
+# SSH consoles.
