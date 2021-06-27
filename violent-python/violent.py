@@ -8,6 +8,7 @@ import nmap
 import time
 import crypt
 import urllib
+import sqlite3
 import pexpect
 import zipfile
 import optparse
@@ -936,3 +937,265 @@ def img_exif_main(url):
 # server, SQLite operates on a single file (which is saved on the project directory), making it
 # a good target for, ahem, hacking stuff.
 
+# Skype also uses SQLite and the database file is stored in different directories in different OS's
+# as usual (for MAC, it is cd /Users/<User>/Library/Application\ Support/Skype/<Skypeaccount>). We
+# can connect to these databases and check out what the application stores in it; spoiler alert -
+# it contains goodies like contacts, accounts, messages, etc (basically anything that is in the app
+# itself).
+
+
+def print_profile(skype_db):
+    conn = sqlite3.connect(skype_db)
+    c = conn.cursor()
+    c.execute(
+        "SELECT fullname, skypename, city, country, datetime(profile_timestamp,'unixepoch') FROM Accounts;")
+
+    for row in c:
+        print("[*] Found profile")
+        print('[+] User: '+str(row[0]))
+        print('[+] Skype Username: '+str(row[1]))
+        print('[+] Location: '+str(row[2])+','+str(row[3]))
+        print('[+] Profile Date: '+str(row[4]))
+
+# Pass the above function "main.db" along with its absolute path, for whatever OS you're on.
+# Using a similar idea from above, we'll extract some data from the contacts table.
+
+
+def print_contacts(skyp_db):
+    conn = sqlite3.connect(skyp_db)
+    c = conn.cursor()
+    c.execute(
+        "SELECT  displayname, skypename, city, country, phone_mobile, birthday FROM Contacts;")
+
+    for row in c:
+        print("[*] Found contacts")
+        print('[+] User : ' + str(row[0]))
+        print('[+] Skype Username : ' + str(row[1]))
+        if str(row[2]) != '' and str(row[2]) != 'None':
+            print('[+] Location : ' + str(row[2]) + ',' + str(row[3]))
+        if str(row[4]) != 'None':
+            print('[+] Mobile Number : ' + str(row[4]))
+        if str(row[5]) != 'None':
+            print('[+] Birthday : ' + str(row[5]))
+
+# So we extracted specific columns from specific tables. What if we wanted to output
+# some info of multiple tables together? This calls for the infamous join. For example -
+# to output a call, we need info from the Calls and Conversation tables.
+
+
+def print_call_log(skype_db):
+    conn = sqlite3.connect(skype_db)
+    c = conn.cursor()
+
+    # Select the call timestamp and identity from table Calls and Conversations where
+    # both ids are equal
+    c.execute(
+        "SELECT datetime(begin_timestamp,'unixepoch'), \
+        identity FROM calls, conversations WHERE \
+        calls.conv_dbid = conversations.id;"
+    )
+
+    for row in c:
+        print("[+] Call time: {} | Identity: {}".format(str(row[0]), str(row[1])))
+
+# The skype database also stores all messages received and sent by the user profile.
+# Very secure! ;) ;)
+
+
+def print_mesages(skype_db):
+    conn = sqlite3.connect(skype_db)
+    c = conn.cursor()
+    c.execute("SELECT datetime(timestamp,'unixepoch'), \
+    dialog_partner, author, body_xml FROM Messages;")
+
+    for row in c:
+        try:
+            if 'partlist' not in str(row[3]):
+
+                # If dialog_partner != author
+                if str(row[1]) != str(row[2]):
+                    msg_direction = "To " + str(row[1]) + ": "
+
+                else:
+                    msg_direction = "To " + str(row[2]) + ": "
+
+                print("Time: {} {} {}".format(
+                    str(row[0]), msg_direction, str(row[3])))
+        except:
+            pass
+
+# Browsers also store certain information in databases. For instance, firefox stores certain
+# things in SQLite as well (In MAC OX, it is
+# /Users/<USER>/Library/Application\ Support/Firefox/Profiles/<profile folder>). One more
+# pro tip: learn linux cmd seriously. For example - as you were reading this section, you
+# were thinking, "I wonder how people find these files. On the web? Oh gee, I'm gonna have
+# to look for these things one folder at a time?!". But there are easier ways, if you know
+# you command line homie. You could just go to the firefox main directory and search for
+# files using regexes i.e. ls *.sqlite i.e. show all files ending with a .sqlite extension!
+
+
+def print_firefox_downloads(db):
+    conn = sqlite3.connect(db)
+    c = conn.cursor()
+
+    # For some reason, firefox developers decided to multiply the UNIX epoch time by 1000000
+    # before saving it in the DB, so we divide it to get the actual epoch time.
+    c.execute('SELECT name, source, datetime(endTime/1000000,\
+    \'unixepoch\') FROM moz_downloads;')
+
+    for row in c:
+        print(
+            "File {} downloaded from source {} @ {}".format(str(row[0]), str(row[1]), str(row[2])))
+
+# What if you want to log into sites that use authentication? Here's how. Most websites that use
+# authentication use cookies. When logged in successfully, the login page sets a cookie and redirects
+# the page to another section. After that, no matter how many times you refresh the page, the session
+# seems to persist. How? Cookies (or tokens of some other kind). In fact, even Instagram does this;
+# this is unavoidable for user experience reasons (you'd have to login every time you visit another
+# person's profile or search for something). If you're trying to break into a website, why not break
+# into the source of what you're using to view the website in the first place?
+
+
+def extract_cookies(db):
+    try:
+        conn = sqlite3.connect(db)
+        c = conn.cursor()
+        c.execute('SELECT host, name, value FROM moz_cookies')
+
+        for row in c:
+            # Double the {{}}'s if you want to print a literal curly brace in format string
+            print("Host: {}, Cookie: {{{}:{}}}, ".format(
+                str(row[0]), str(row[1]), str(row[2])))
+
+    except Exception as e:
+        # Doing this because in older versions of sqlite3, there may be an "encryption"
+        # error which arises
+        if 'encrypted' in str(e):
+            print('[*] Error reading your cookies database.')
+            print('[*] Upgrade your Python-Sqlite3 Library')
+
+
+def print_history(db):
+    try:
+        conn = sqlite3.connect(db)
+        c = conn.cursor()
+        c.execute("select url, datetime(visit_date/1000000, \
+        'unixepoch') from moz_places, moz_historyvisits \
+        where visit_count > 0 and moz_places.id==\
+        moz_historyvisits.place_id;")
+
+        for row in c:
+            url = str(row[0])
+            if 'google' in url.lower():
+                r = re.findall(r'q=.*\&', url)
+                if r:
+                    search = r[0].split('&')[0]
+                    search = search.replace('q=', '').replace('+', ' ')
+                    print(
+                        "[+] Google search for {} on {}".format(search, str(row[1])))
+
+    except Exception as e:
+        if 'encrypted' in str(e):
+            print('[*] Error reading your cookies database.')
+            print('[*] Upgrade your Python-Sqlite3 Library')
+
+# Using regular expressions, you can search for specific things inside a browser history,
+# which may reveal pretty compromising things. Let's expand upon the previous function
+# to search for google in the visited URLs.
+
+# A very important point --
+# The coming function in the book composes all the previous
+# functions we've written. In doing so, we will generate the full path of the SQLite database
+# file. We could just hardcode the path string (Users/Files/Location/file.sqlite), but this
+# will make it platform dependent: using os.path.join and other os module functions lets us
+# write os-independent scripts, which is what we're gunning for.
+
+# Investigating itunes mobile backups? In April 2011, it was revealed that Apple devices
+# saved GPS coordinates of the device's movements in a database file, which might obviously
+# be used for bad purposes. This is not just limited to locations. Text messages are
+# susceptible to the same vulnerability, which is at its worst during phone backups.
+# Phone backups are stored in a special directory on the computer
+# (MAC OS: /Users/<USERNAME>/Library/Application Support/MobileSync/Backup/). The
+# directory contains a bunch of files with garbage names. To get more info out of the
+# files, we can use the UNIX command "file", through which we can discover the database
+# files. The problem now is that we don't know the structure of these databases, which
+# we need before we can do anything with it like in the previous section.
+
+# We will write a function which attempts to connect to each of these files and spit
+# out tables for sqlite_master (exists in each SQLite db).
+
+
+def print_tables(db):
+    try:
+        conn = sqlite3.connect(db)
+        c = conn.cursor()
+
+        # Printing all tables from the master table
+        c.execute('SELECT tbl_name FROM sqlite_master \
+        WHERE type==\"table\";')
+        print("[*] Connected to database")
+
+        for row in c:
+            print("[+] Table {}".format(str(row)))
+    except:
+        pass
+
+    finally:
+        conn.close()
+
+
+def open_dir():
+    dir = os.listdir(os.getcwd())
+    # For each file in the backup directory, try to connect to it
+    # It'll only do so if it is sqlite file, otherwise it will raise an exception
+    for file in dir:
+        print_tables(file)
+
+# One of the files will have a messages db. Remember that rhere will be different backup folders,
+# so we want to write a function which will only return the messages db. The current version will
+# enumerate all tables on all files.
+
+
+def is_message_table(db):
+    try:
+        conn = sqlite3.connect(db)
+        c = conn.cursor()
+
+        # Printing all tables from the master table
+        c.execute('SELECT tbl_name FROM sqlite_master \
+        WHERE type==\"table\";')
+
+        for row in c:
+            if 'messages' in str(row):
+                return True
+    except:
+        return False
+
+
+def print_messages(db):
+    try:
+        conn = sqlite3.connect(db)
+        c = conn.cursor()
+        c.execute('select datetime(date,\'unixepoch\'),\
+        address, text from message WHERE address>0;')
+
+        for row in c:
+            print("Date: {}, Address: {}, and Message: {}".format(
+                str(row[0]), str(row[1]), str(row[2])))
+    except:
+        pass
+
+# backup_path is the directory in which the backup folders are
+
+
+def messages_main(backup_path):
+    dirs = os.listdir(backup_path)
+    for file in dirs:
+        fullpath = os.path.join(backup_path, file)
+
+        if is_message_table(fullpath):
+            try:
+                print("[*] Found some spicy messages")
+                print_mesages(fullpath)
+            except:
+                pass
