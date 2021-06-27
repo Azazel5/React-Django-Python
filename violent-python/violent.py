@@ -2,17 +2,26 @@
 # Chapter 1
 #####################################################################
 
+import re
 import os
 import nmap
 import time
 import crypt
-import ftplib
+import urllib
 import pexpect
 import zipfile
 import optparse
+import mechanize
+import urllib.parse
 from socket import *
+# from winreg import * || This is a windows only module
+from PIL import Image
+from PIL.ExifTags import TAGS
 from threading import *
 from pexpect import pxssh
+from bs4 import BeautifulSoup
+from urllib.parse import urlsplit
+from PyPDF2 import PdfFileReader
 
 
 def banner_and_service_example():
@@ -710,3 +719,220 @@ def buffer_attack(target, command, crash):
 #####################################################################
 # Chapter 3
 #####################################################################
+
+# Windows OS stores certain metadata regarding wireless networks, which
+# can be acquired through something called the windows registry. This registry
+# stores the MAC address (a unique identifier given to a network adapter) in
+# a REG_BINARY value.
+
+
+def reg_to_mac(reg):
+    addr = ""
+
+    for character in reg:
+        addr += ("%02x " % ord(character))
+
+    addr = addr.strip(" ").replace(" ", ":")[:17]
+    return addr
+
+# We can write a function to extract network name and MAC address for every listed
+# network profile from specific keys in the windows registry.
+
+
+def print_nets():
+    # I'm assuming this is the directory in which the registry is held
+    net = "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion" +\
+        "\\NetworkList\\Signatures\\Unmanaged"
+
+    key = OpenKey(HKEY_LOCAL_MACHINE, net)
+    for i in range(100):
+        try:
+            guid = EnumKey(key, i)
+            net_key = OpenKey(key, str(guid))
+            _, addr, _ = EnumValue(net_key, 5)
+            _, name, _ = EnumValue(net_key, 4)
+            mac_addr = reg_to_mac(addr)
+            net_name = str(name)
+            print("[+] {} {}"/format(net_name, mac_addr))
+
+        except:
+            break
+
+# Using MAC addresses of a wireless acess point, we can pinpoint the physical location
+# as well. This can be done via the use of databases which map MAC addresses to the above
+# stated locations. The code below uses the mechanize library which is for stateful web
+# programming in python and the wigle API endpoints.
+
+# The wigle_print function is pretty easy to understand. All it's doing is sending API
+# requests to the wigle service with a valid username and password combination. Once
+# we're authenticated, we'll be able to send requests to the query endpoint and pass
+# it a MAC address, and extract its latitude and longitude using regexes. Combining
+# it with the print_nets function (which spits out the MAC addresses of every
+# network profile saved in the computer), we'll have the latitudes and longitudes
+# of profile.
+
+
+def wigle_print(username, password, netid):
+    browser = mechanize.Browser()
+    browser.open("http://wigle.net")
+    req_data = urllib.parse.urlencode({
+        'credential_0': username,
+        'credential_1': password
+    })
+
+    browser.open('https://wigle.net/gps/gps/main/login', req_data)
+    params = {}
+    params['netid'] = netid
+    req_params = urllib.parse.urlencode(params)
+    resp_URL = 'http://wigle.net/gps/gps/main/confirmquery/'
+    resp = browser.open(resp_URL, req_params).read()
+    map_lat, map_long = 'N/A', 'N/A'
+
+    r_lat = re.findall(r'maplat=.*&', resp)
+    r_long = re.findall(r'maplon=.*&', resp)
+
+    if r_lat:
+        map_lat = r_lat[0].split('&')[0].split('=')[1]
+
+    if r_long:
+        map_long = r_long[0].split
+
+    print("[+] Lat: {}, Long: {}".format(map_lat, map_long))
+
+# Here's something interesting: files you deleted aren't really gone, but can actually be
+# recovered, and we'll learn how to use the python OS module to do that here. (Even if
+# the files were emptied out from the trash, it can still be recovered, but that isn't
+# what we're going for right now).
+
+
+# Trying to make this function OS independent because each OS has its own way
+# of storing deleted files
+def return_dir():
+    dirs = ['C:\\Recycler\\', 'C:\\Recycled\\', 'C:\\$Recycle.Bin\\']
+    for dir in dirs:
+        if os.path.isdir(dirs):
+            return dir
+
+    return None
+
+# In the example the author has given (most likely based on Windows), the Trash
+# folder has subdirectories where the user ID is stored, which is what we need.
+# Turns out, the Windows registry holds this information and we can actually
+# translate the ID to a username.
+
+
+def sid2user(sid):
+    try:
+        key = OpenKey((HKEY_LOCAL_MACHINE,
+                       "SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList"
+                       + '\\' + sid))
+
+        value, _ = QueryValueEx(key, 'ProfileImagePath')
+        user = value.split('\\')[-1]
+        return user
+
+    except:
+        return sid
+
+
+def find_recyled():
+    recyle_dir = return_dir()
+    dirs = os.listdir(recyle_dir)
+
+    # There are subdirectories within the trash folder
+    for dir in dirs:
+        files = os.listdir(dir)
+        username = sid2user(dir)
+        print("[*] Listing files for user:{}".format(username))
+
+        for file in files:
+            print("[+] Found file: {}".format(str(file)))
+
+# Now, this gets really interesting. You can actually check the contents and metadata of these files
+# to find interesting information, using techniques which the forensic investigator in the book used
+# to catch the criminal. Metadata can store useful information like the author's name, file creation
+# or modification time, etc. Pro tip: photos may store GPS location. PyPDF, the tool you've used
+# before, can also be used to check out metadata for pdf documents.
+
+
+def print_meta(filename):
+    pdf = PdfFileReader(open(filename, 'rb'))
+    doc = pdf.getDocumentInfo()
+    print("[*] Metadata for document: " + str(filename))
+    for metadata in doc:
+        print(doc[metadata])
+
+# There's a thing called exif (exchange image file format) which defines how to store images
+# and videos. Digital cameras, smartphones, etc use this while saving media. We can use the
+# exiftool, written by some dope person, which can analyze the exif tags in photos/videos.
+# For example, think of the photos app on Mac OS. There's a section of the app in which we
+# can arrange photos in terms of the geographic region. Think about HOW the app is doing that.
+# The answer is obvious: the only way that can be done is that the latitude and longitude of
+# where the photo was taken must be encoded somewhere in the photo, which is then used to display
+# it in a map. Let's write a script which downloads photos from a site and checks its exif tags.
+
+
+def find_images(url):
+    print("[+] Finding images on url: {}".format(url))
+    url_content = urllib.request.urlopen(url).read()
+    soup = BeautifulSoup(url_content, 'html.parser')
+    images = soup.find_all('img')
+    return images
+
+
+def download_image(image):
+    try:
+        print("[+] Download image")
+        image_src = image['src']
+        image_content = urllib.request.urlopen(image_src).read()
+
+        # Doing this probably extracts the image name exactly from the src
+        image_file_name = os.path.basename(urlsplit(image_src)[2])
+
+        with open(image_file_name, 'wb') as file:
+            file.write(image_content)
+
+        return image_file_name
+    except:
+        return ''
+
+# The python library PIL can be used to process images in python. It actually has a
+# function (called getexif) which retrieves the very thing we're talking about.
+# We check the exif for GPS info and print it out.
+
+
+def test_for_exif(image_file_name):
+    try:
+        exif_data = {}
+        img_data = Image.open(image_file_name)
+        info = img_data.getexif()
+
+        if info:
+            for tag, value in info.items():
+                decoded = TAGS.get(tag, tag)
+                exif_data[decoded] = value
+
+            exifGPS = exif_data['GPSInfo']
+            if exifGPS:
+                print("[+] File {} contains GPS metadata".format(image_file_name))
+                print(exif_data)
+            else:
+                print("[-] No GPS metadata in file")
+        else:
+            print("[-] No exif tags outputted by function")
+
+    except Exception as e:
+        print("[-] Something went wrong: " + str(e))
+
+
+def img_exif_main(url):
+    images = find_images(url)
+    for image in images:
+        file = download_image(image)
+        test_for_exif(file)
+
+# Databases are one of the most popular ways of storing data, and out of all types of databases,
+# the name SQLite should ring a heavy bell because of its easy of use. Also, instead of a database
+# server, SQLite operates on a single file (which is saved on the project directory), making it
+# a good target for, ahem, hacking stuff.
+
