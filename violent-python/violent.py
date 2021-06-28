@@ -6,6 +6,7 @@ import re
 import os
 import nmap
 import time
+import dpkt
 import crypt
 import urllib
 import sqlite3
@@ -17,12 +18,13 @@ import urllib.parse
 from socket import *
 # from winreg import * || This is a windows only module
 from PIL import Image
-from PIL.ExifTags import TAGS
+import geoip2.database
 from threading import *
 from pexpect import pxssh
 from bs4 import BeautifulSoup
-from urllib.parse import urlsplit
+from PIL.ExifTags import TAGS
 from PyPDF2 import PdfFileReader
+from urllib.parse import urlsplit
 
 
 def banner_and_service_example():
@@ -1199,3 +1201,62 @@ def messages_main(backup_path):
                 print_mesages(fullpath)
             except:
                 pass
+
+
+#####################################################################
+# Chapter 4
+#####################################################################
+
+# Let's learn how to look at network traffic using python. We'll use some existing
+# database which maps IP addresses to physical locations (just like we did with
+# MAC addresses a couple chapters ago). For this one, we use the maxmind database
+# with the pygeoip library.
+
+def print_ip_location(ip):
+    with geoip2.database.Reader('locations.mmdb') as gi:
+        try:
+            rec = gi.city(ip)
+            city = rec.city.name
+            country = rec.country.name
+
+            if city != '':
+                geoloc = city + ', ' + country
+            else:
+                geoloc = country
+
+            return geoloc
+        except:
+            return 'unregistered'
+
+# Using dpkt or scapy, we can look at network packets, and even take a look at each layer.
+
+
+def print_pcap(pcap):
+    for _, buf in pcap:
+        try:
+            eth = dpkt.ethernet.Ethernet(buf)
+            ip = eth.data
+            src = inet_ntoa(ip.src)
+            dst = inet_ntoa(ip.dst)
+            print("[+] Src: {} ---> Dst: {}".format(src, dst))
+            print(print_ip_location(src), print_ip_location(dst))
+        except:
+            pass
+
+
+def pcap_main(pcap_file):
+    with open(pcap_file, 'rb') as file:
+        pcap = dpkt.pcap.Reader(file)
+        print_pcap(pcap)
+
+# To recap, you must get the pcap (hehe) file and pass it into the pcap_main function. Pcap
+# is a capture of network activity, which can be done by the pypcap library. However, this
+# library has bad documentation, so I decided to use the scapy library which I'd heard about.
+# Using the sniff method, I downloaded all source and destination packets into a pcap file and
+# passed it to the functions above which showed a list of packets being sent from my IP to
+# whatever server of the website I was visiting during the sniff session. If the city wasn't
+# listed in the maxmind database, it is listed as unregistered, otherwise it spits out the
+# city and country of the server; since there is a lot of packets being sent to and fro
+# my computer to servers, some IPs get repeated. For eg. 1.1.1.1 -> 2.2.2.2 and then
+# 2.2.2.2 -> 1.1.1.1 i.e. the src and dest get switched on each request and response
+# cycle (from what I understand).
