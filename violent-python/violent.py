@@ -20,7 +20,9 @@ from socket import *
 from PIL import Image
 import geoip2.database
 from threading import *
+from scapy.all import *
 from pexpect import pxssh
+from IPy import IP as IPTEST
 from bs4 import BeautifulSoup
 from PIL.ExifTags import TAGS
 from PyPDF2 import PdfFileReader
@@ -1260,3 +1262,191 @@ def pcap_main(pcap_file):
 # my computer to servers, some IPs get repeated. For eg. 1.1.1.1 -> 2.2.2.2 and then
 # 2.2.2.2 -> 1.1.1.1 i.e. the src and dest get switched on each request and response
 # cycle (from what I understand).
+
+# KML files are a format used to mark places on Google Earth (or something along those lines).
+# What we can do now is use the IP address latitudes and longitudes and plot them on google
+# earth to display them.
+
+
+def return_kml(ip):
+    try:
+        with geoip2.database.Reader('locations.mmdb') as gi:
+            rec = gi.city(ip)
+            lat = rec.location.latitude
+            long = rec.location.longitude
+            kml = (
+                '<Placemark>\n',
+                f'<name>{ip}</name>',
+                '<Point>\n'
+                f'<coordinates>{lat},{long}</coordinates>\n'
+                '</Point>\n'
+                '</Placemark>\n'
+            )
+
+            return ''.join(kml)
+    except:
+        return ''
+
+
+def plot_ips(pcap):
+    kml_pts = ''
+    for _, buf in pcap:
+        try:
+            eth = dpkt.ethernet.Ethernet(buf)
+            ip = eth.data
+            src = inet_ntoa(ip.src)
+            src_kml = return_kml(src)
+            dst = inet_ntoa(ip.dst)
+            dst_kml = return_kml(dst)
+            kml_pts += src_kml + dst_kml
+        except Exception as e:
+            print(str(e))
+
+    return kml_pts
+
+
+# Read the pcap file, open using dpkt reader, and call the function,
+# which loops through the pcap, parses the src and destination IPs,
+# and appends the results to a KML style tuple.
+
+# Let's talk about LOIC (Low Orbit Ion Cannon), which is a DOS attack
+# toolkit; it fills the target with UDP/TCP traffic to overwhelm it.
+# The anonymous group came up with this toolkit. Let's come up with a
+# script which proves that a member downloaded and used it.
+
+# This script will analyze HTTP traffic and check for GET requests for
+# the LOIC zip file. Once again, we'll rely on the dpkt library which
+# is proving to be very useful.
+
+def find_loic_download(pcap):
+    for _, buf in pcap:
+        try:
+            # Parsing through layers of networks i.e. ethernet, IP, TCP
+            eth = dpkt.ethernet.Ethernet(buf)
+            ip = eth.data
+            src = inet_ntoa(ip.src)
+            tcp = ip.data
+            http = dpkt.http.Request(tcp.data)
+
+            if http.method == 'GET':
+                uri = http.uri.lower()
+                if '.zip' in uri and 'loic' in uri:
+                    print('[!] {} downloaded LOIC'.format(src))
+                else:
+                    print('[+] {} is clean'.format(src))
+        except:
+            pass
+
+
+# Using a pcap file to find a connection to HIVEMIND
+def find_hivemand(pcap):
+    for _, buf in pcap:
+        try:
+            eth = dpkt.ethernet.Ethernet(buf)
+            ip = eth.data
+            src = inet_ntoa(ip.src)
+            dst = inet_ntoa(ip.dst)
+            tcp = ip.data
+
+            # destination and source tcp ports
+            dport = tcp.dport
+            sport = tcp.sport
+
+            # We know that HIVEMIND uses port 6667
+            if dport == 6667:
+                if '!lazor' in tcp.data.lower():
+                    print("[!] DDoS Hivemind issued by {}".format(src))
+                    print("[+] Target command: {}".format(tcp.data))
+            if sport == 6667:
+                if '!lazor' in tcp.data.lower():
+                    print("[!] DDoS Hivemind issued by {}".format(dst))
+                    print("[+] Target command: {}".format(tcp.data))
+        except:
+            pass
+
+
+# How can you identity DDoS attacks? The attacker fires a massive amount
+# of TCP packets to a target. If we see a certain number of packets being
+# sent every fraction of a second or something, that's when we know that
+# something funky is going on. Usually, targets have a tough time even
+# acknowledging most of these packets.
+ATTACK_THRESHOLD = 10000
+
+
+def find_attack(pcap):
+    packet_count = {}
+
+    for _, buf in pcap:
+        try:
+            eth = dpkt.ethernet.Ethernet(buf)
+            ip = eth.data
+            src = inet_ntoa(ip.src)
+            dst = inet_ntoa(ip.dst)
+            tcp = ip.data
+            dport = tcp.dport
+
+            if dport == 80:
+                stream = src + ":" + dst
+                if stream in packet_count:
+                    packet_count[stream] += 1
+                else:
+                    packet_count[stream] = 1
+        except:
+            pass
+
+    for stream in packet_count:
+        packets = packet_count[stream]
+        if packets > ATTACK_THRESHOLD:
+            src, dst = stream.split(":")
+            print(
+                "[+] Src {} attacked dst {} with {} packets".format(src, dst, str(packets)))
+
+# Back when nmap was just released, the Pentagon actually faced several threats as a result of the
+# tool's usage. H.D Moore, as a teenager, conjectured that the TTL (time to live) field would be
+# useful in determining which attacks were real and which were decoys.
+# When a computer sends an IP packet, it sets the field as an upper bound of how many hops it
+# can take before reaching the destination. Each routing device touched by the packet decrements
+# this value.
+
+# Remember to always run any scapy code with root user privileges AKA sudo
+
+
+def test_ttl(packet):
+    try:
+        if packet.haslayer(IP):
+            ipsrc = packet.getlayer(IP).src
+            ttl = str(packet.ttl)
+            print("[+] Packet received from {} with TTL {}".format(ipsrc, ttl))
+    except:
+        pass
+
+
+def test_ttl_main():
+    sniff(prn=test_ttl, store=0)
+
+
+ttl_values = {}
+HOP_THRESHOLD = 5
+
+
+def check_received_ttl_versus_actual(ipsrc, ttl):
+    if IPTEST(ipsrc).iptype == 'PRIVATE':
+        return
+
+    # If we haven't seen this IP address, build a packet with destination address equal
+    # to source. Send an ICMP echo request so the destination has to respond. Once we
+    # get it, set the TTL value from the packet.
+    if ipsrc not in ttl_values:
+        pck = sr1(IP(dst=ipsrc) / ICMP(),
+                  retry=0, timeout=1, verbose=0)
+
+        ttl_values[ipsrc] = pck.ttl
+
+    if abs(int(ttl) - int(ttl_values[ipsrc]) > 5):
+        print("[!] Detected possible spoofed packet from {}".format(ipsrc))
+        print("[!] Received TIL: {}, Actual TIL: {}".format(
+            ttl, ttl_values[ipsrc]))
+
+# Linux by default has a TIL of 64 and windows has one of 128, which is why a TIL of 13
+# draws red flags. By now, nmap has probably fixed this error in decoy network scans, which
+# is why it important to understand where vulnerabilities lie in systems and tools.
