@@ -8,7 +8,8 @@ Each invidual folder is a small project, tutorial, or notes on documentation whe
 Each folder is its own project, and it contains a text file which lists the project requirements.
 Here's a general overview of each project and some new things I learnt during the process
 
-* advanced-pentest
+* Realtime Communication with WebRTC - Gaining a hands on introduction to WebRTC APIs; learning more
+about peer-to-peer connections, mediaStreams, and more.
 
 * Violent Python - Using python in penetration testing. This is a great book which showcases the use cases
 of python in cyber security. 

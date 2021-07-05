@@ -1,0 +1,70 @@
+Introduction
+------------
+
+The point of developing nd using WebRTC is for browsers to exchange real-time data peer-to-peer.
+Classically speaking, the web works in a client-server model i.e. requesting the server and 
+the server sending back a response. WebRTC takes this further by making it peer-to-peer.
+PeerConnections allow data to flow freely in between browsers without intermediary servers.
+   
+    "The most common WebRTC scenario is likely to be the one where both browsers are
+    running the same web application, downloaded from the same web page. In this case
+    the Trapezoid becomes a Triangle"
+
+NAT devices at the end of the NAT network makes sure that depleted IPv4 addresses can be 
+reused.
+
+            HTTP                WebRTC API 
+Web Server ------> JS/HTML/CSS ------------> Browser 
+
+Let's think of a video + audio call in between two browsers. This involves:
+    1. Caller browser, Caller JS application, Web server
+    2. Callee JS application, Callee Browser 
+
+WebRTC API builds around three main classes: MediaStream, PeerConnection, and DataChannel.
+
+A MediaStream is a stream of audio or video. LocalMediaStream represents a stream recorded
+from a local device such as a microphone or webcam. To create that, the app must ask permission
+from the user via the getUserMedia function.
+
+A PeerConnection is, as the name suggests, a connection between peer browsers. The other remote
+peer usually runs an instance of the same JS application (but the language of the book suggests
+that this need not be the case always). Connections are coordinated via signaling chanels in the 
+web server through XMLHttpRequest or sockets.
+
+Bonus: what is STUN and TURN? STUN (Session Traversal Utilities for NAT) allows the app to locate 
+NAT on the network. Traversal Using Relays around NAT (TURN) helps the app locate IPs and ports.
+This PeerConnection uses ICE protocol with STUN and TURN to allow data to UDP pass through 
+firewalls and stuff. Therefore, using these APIs are a great way to share data remotely, bypassing
+the need for servers and stuff.
+
+DataChannel allows browsers to send bi-directional data.
+
+Basic steps for a simple WebRTC applicatioon:
+
+1. Ram and Shyam connect to a web server containing the application
+2. Ram starts a call, which creates a PeerConnection object. Then the calling side sets UDP
+   a MediaStream. Then a signaling message is created with ICE candidates with a fingerprint 
+   and sent to the server.
+3. The server processes this, determines the person who's being called AKA Shyam, and sends 
+   a signal to Shyam, who answers the call; in doing so, his JS creates a PeerConnection, and 
+   everything in steps 2. and 3. are repeated, ending with a fingerprint being sent back to 
+   Ram.
+
+Handling Media in the Browser
+-----------------------------
+
+Media tracks can contain many other channels, such as one video + two audio (for left and right).
+The createObjectUrl() function tells the browser to create a media blob which the book talks about,
+and it's needed for both local and remote streams.
+
+If the success callback is fired, the function is passed a media stream, which can be set to the 
+window (made available in the console)/video element and played.
+
+VVIMP: Browsers provide a media pipeline from sources to sinks. Sinks are img, vid, etc tags, and 
+sources can be webcams, microphones, or FILES ON THE USER's HARD DRIVE. The WebRTC constraints 
+API also allows developers to control the video height/width/aspect ratios etc. 
+
+
+Building the Browser RTC Trapezoid: A Local Perspective
+-------------------------------------------------------
+
