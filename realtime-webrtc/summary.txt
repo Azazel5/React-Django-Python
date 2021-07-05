@@ -68,3 +68,8 @@ API also allows developers to control the video height/width/aspect ratios etc.
 Building the Browser RTC Trapezoid: A Local Perspective
 -------------------------------------------------------
 
+The signaling channel needs to support the exchange of three kinds of information, namely:
+Media session management, Nodes' network information, and Nodes' multimedia capabilities.
+In this chapter, we will not focus on this and create two different peers in a single machine.
+If you wanna see how to do the same in different peers from different machines, stay tuned for
+the next chapter.
