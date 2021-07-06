@@ -73,3 +73,9 @@ Media session management, Nodes' network information, and Nodes' multimedia capa
 In this chapter, we will not focus on this and create two different peers in a single machine.
 If you wanna see how to do the same in different peers from different machines, stay tuned for
 the next chapter.
+
+You can also add data channels to PeerConnections, allowing for bi-directional data exchange.
+You can take a look at the code either in the JS files or in the book, but the concept, after 
+creating RTCConnections, is the same: join the data channel/media to the PeerConnection and 
+register event handlers for when the data is ready on the local side and the remote side, 
+handle errors, and perform all house keeping such as disabling/enabling buttons etc.
