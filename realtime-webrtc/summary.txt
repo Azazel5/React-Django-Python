@@ -79,3 +79,37 @@ You can take a look at the code either in the JS files or in the book, but the c
 creating RTCConnections, is the same: join the data channel/media to the PeerConnection and 
 register event handlers for when the data is ready on the local side and the remote side, 
 handle errors, and perform all house keeping such as disabling/enabling buttons etc.
+
+You have to define the data channel onclose and onopen handlers after making the DataChannel.
+And you must also specify a remote data channel receieved handler. This callback occurs 
+after the createOffer function call. An answer is created in the gotLocalDescription function 
+
+The Need for a Signaling Channel
+--------------------------------
+
+Signaling is required to exchange session and network based information. We will create a
+full-stack app involving two clients and a server to showcase an actual PeerConnection.
+There are three different actors in this app: a channel initiator, a signaling server, and 
+a channel join. A channel is created upon a specific request from the initiator to the server, 
+which creates the channel, and messages can begin after the second peer joins.
+
+Putting It All Together: Your First WebRTC System from Scratch
+--------------------------------------------------------------
+
+We're going to create a full fledged WebRTC system now, which will be very crucial for your 
+application's development. Here's a list of steps used in a full WebRTC app:
+
+    1. Initiator connects to the server, which then creates the signaling channel 
+    2. Initiator asks the user for permission and gets media
+    3. Joiner connects to the server and joins the channel
+    4. Joiner gets access to local media and the server sends the initiator a message 
+       
+       4.1. Initiator creates PeerConnection, adds local stream, creates SDP offer, and 
+       sends it to the remote peer 
+
+       4.2. After receiving the offer, the joiner also creates the PeerConnection, adds its 
+       media feed, and sends the SDP answer to its remote party
+
+    5. During this, the two peers send network reachability info through the signaling mechanism
+    6. When the initiator receives its offer answer from the other peer, and also uses the 
+    DataChannel to easily exchange information.

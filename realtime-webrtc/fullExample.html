@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple WebRTC application with NodeJS signaling</title>
+</head>
+
+<body>
+    <div id="mainDiv">
+        <table border="1" width="100%">
+            <tr>
+                <th>
+                    Local video
+                </th>
+                <th>
+                    Remote video
+                </th>
+            </tr>
+            <tr>
+                <td>
+                    <video id="localVideo" autoplay></video>
+                </td>
+                <td>
+                    <video id="remoteVideo" autoplay></video>
+                </td>
+            </tr>
+            <tr>
+                <td align="center">
+                    <textarea rows="4" cols="60" id="dataChannelSend" disabled placeholder="This will be enabled once
+    the data channel is up...">
+    </textarea>
+                </td>
+                <td align="center">
+                    <textarea rows="4" cols="60" id="dataChannelReceive" disabled>
+    </textarea>
+                </td>
+            </tr>
+            <tr>
+                <td align="center">
+                    <button id="sendButton" disabled>Send</button>
+                </td>
+                <td></td>
+            </tr>
+        </table>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.3/socket.io.js"
+        integrity="sha512-PU5S6BA03fRv1Q5fpwXjg5nlRrgdoguZ74urFInkbABMCENyx5oP3hrDzYMMPh3qdLdknIvrGj3yqZ4JuU7Nag=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/webrtc-adapter/8.0.0/adapter.min.js"
+        integrity="sha512-j4toPJRj1AKj9lVyINsBDFG2BHf4DKQZHCpB0HhNW56FAKQuPCQXBimvbUUYJ1wkCaLoyGis43Np90Zje/o0vQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src='js/completeNodeClientWithDataChannel.js'></script>
+    </div>
+</body>
+
+</html>

