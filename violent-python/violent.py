@@ -19,6 +19,7 @@ from socket import *
 # from winreg import * || This is a windows only module
 from PIL import Image
 import geoip2.database
+from bluetooth import *
 from threading import *
 from scapy.all import *
 from pexpect import pxssh
@@ -1875,6 +1876,7 @@ class InterceptThread(Thread):
 def fire_catcher(pkt):
     raw = pkt.sprintf("%Raw.load%")
     r = re.findall('wordpress_[0-9a-fA-F]{32}', raw)
+    cookie_table = {}
 
     # If there's a Set in a cookie, it was just set and thus is obviously not being reused
     # This will print a bunch of src, dst, and cookies from the network being sniffed. If 
@@ -1882,5 +1884,79 @@ def fire_catcher(pkt):
     # one's which, we can implement a dictionary to raise an error if there's a common key.
     
     if r and 'Set' not in r:
-        print("Source {} -> Destination {} | Cookie: {}"\
-            .format(pkt.getlayer(IP).src, pkt.getlayer(IP).dst, r[0]))
+        if r[0] not in cookie_table.keys():
+            cookie_table[r[0]] = pkt.getlayer(IP).src
+        elif cookie_table[r[0]] != pkt.getlayer(IP).src:
+            print("[!] Detected a cookie reuse attack!")
+            print("Victim={}".format(cookie_table[r[0]]))
+            print("Attacker={}".format(pkt.getlayer(IP).src))
+
+
+# We've seen the power of sniffing networks and parsing packets. Now we can proceed to attacking
+# bluetooth devices. Using the PyBluez library, we can call functions like discover_devices to
+# list out the MAC addresses of devices nearby. The library also has a function to convert the 
+# address to a human readable string.
+
+already_found = []
+
+def find_devices():
+    nearby_devices = discover_devices(lookup_names=True)
+    for addr, name in nearby_devices:
+        if addr not in already_found:
+            already_found.append(addr)
+            print("  {} - {}".format(addr, name))
+
+# This only finds bluetooth devices with mode set to discoverable. 
+#     "Let’s consider a trick to target the iPhone’s Bluetooth radio in hidden mode. 
+#     Adding 1 to the MAC address of the 802.11 Wireless Radio identifies the Bluetooth Radio MAC
+#     address for the iPhone"
+# We will sniff for the 802.11 Wireless Radio which is doable because it doesn't protect its
+# MAC address through layer-2 controls. The first three bytes of a MAC address is the OUI
+# i.e. Organizational Unique Identifier. It's crazy how much information is out there on the 
+# internet because there are actually databases which list of these manufacturers with OUIs.
+# Checking my own device's address, I saw that the first three bytes does list the manufacturer.
+# Let's listen for a device with this MAC address, so we can find the MAC address of the 802.11
+# radio.
+
+def wifi_print(pkt):
+    iphone_oui = '88:B2:91'
+    if pkt.haslayer(Dot11):
+        wifi_mac = pkt.getlayer(Dot11).addr2
+
+        # If the OUI matches the first 8 characters of the address string
+        if iphone_oui == wifi_mac[:8]:
+            print("[*] Detected iphone radio mac: {}".format(wifi_mac))
+
+# Using the MAC address of the wireless radio, we will now construct MAC address
+# of the bluetooth radio. To reiterate, we had to go this long route because this 
+# particular bluetooth device is cloaked.
+def return_bt_address(addr):
+
+    # The second number in the constructor specifies a base. Add 1, convert it to hex, and remove the 0x part
+    # Add the colons after every two characters
+    bt_addr = str(hex(int(addr.replace(':', ''), 16) + 1))[2:]
+    bt_addr = bt_addr[0:2]+":"+bt_addr[2:4]+":"+bt_addr[4:6]+":"+\
+        bt_addr[6:8]+":"+bt_addr[8:10]+":"+bt_addr[10:12]
+    return bt_addr
+
+# The rationale is that, even in hidden mode, the device still responds to a device name inquiry.
+# Let's talk about a bluetooth vulnerability in the RFCOMM channel. This channel emulates RS232
+# serial ports over the bluetooth L2CAP protocol. Now what does this mean in English? THe 
+# RS232 port used to be how computers connected to printers, telephone modems, and the like.
+# (this has since been replaced by USB cable). L2CAP is a protocol used in bluetooth, and the 
+# RFCOMM channel is built upon the former.
+
+# Usually RFCOMM can encrypt connections, some manufacturers forget to do so. To make a RFCOMM
+# connection, we can create a RFCOMM type socket.
+
+def rfcomm_conn(addr, port):
+    sock = BluetoothSocket(RFCOMM)
+    try:
+        sock.connect((addr, port))
+        print("[+] RFCOMM Port: {} open".format(str(port)))
+        sock.close()
+    except:
+        print("Port's closed homie")
+
+# The bluetooth service discovery protocol - enumerates types of profiles and services offered by
+# bluetooth devices.
