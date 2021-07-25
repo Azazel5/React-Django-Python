@@ -14,6 +14,7 @@ import urllib
 import sqlite3
 import pexpect
 import zipfile
+import smtplib
 import optparse
 # import cookielib - no longer cookielib in python3
 import mechanize
@@ -31,6 +32,7 @@ from bs4 import BeautifulSoup
 from PIL.ExifTags import TAGS
 from PyPDF2 import PdfFileReader
 from urllib.parse import urlsplit
+from email.mime.text import MIMEText
 
 
 def banner_and_service_example():
@@ -2199,4 +2201,97 @@ def twitter_locate(tweets, cities):
 
 
 def find_interests(tweets):
-    pass
+    interests = {}
+    interests['links'] = []
+    interests['users'] = []
+    interests['hashtags'] = []
+
+    for tweet in tweets:
+        text = tweet['tweet']
+
+        # \Z matches at the end
+        links = re.compile('(http.*?)\Z|(http.*?) ')\
+            .findall(text)
+
+        for link in links:
+            if link[0]:
+                link = link[0]
+            elif link[1]:
+                link = link[1]
+            else:
+                continue
+
+            try:
+                # Saving a link only after using urlopen because links are
+                # often shortened in Twitter due to the character limit
+
+                response = urllib.request.urlopen(link)
+                full_link = response.url
+                interests['link'].append(full_link)
+            except:
+                pass
+
+        # w is a regex metacharacter which matches for a word. Regexes
+        # have many mechanisms for matching which you don't know about!
+
+        interests['users'] += re.compile('(@\w+)').findall(text)
+        interests['hashtags'] += re.compile('(#\w+)').findall(text)
+
+    interests['users'].sort()
+    interests['hashtags'].sort()
+    interests['links'].sort()
+    return interests
+
+# Crazy to think that there exist disposable email addresses, which can
+# terminate after 10 minutes even. Sending emails is an easy process using
+# the smtplib library.
+
+# MIME = multipurpose internet mail extensions
+
+
+def send_email(user, password, to, subject, text):
+    msg = MIMEText(text)
+    msg['From'] = user
+    msg['To'] = to
+    msg['Subject'] = subject
+    try:
+        smtp_server = smtplib.SMTP('smtp.gmail.com', 587)
+        print("[+] Connecting to mail server")
+        smtp_server.ehlo()
+        smtp_server.starttls()
+        smtp_server.ehlo()
+        smtp_server.login(user, password)
+        print("[+] Logged into the mail server")
+        smtp_server.sendmail(user, to, msg.as_string())
+        smtp_server.close()
+        print("[!] Mail sent successfully")
+
+    except:
+        print("[-] Sending mail failed")
+
+# Many email servers are not open replayers and will only send mails
+# to specific addresses. What scammers do is set up a local email server
+# as open relay (or any open relay on the Internet), using which the To
+# email addresses doesn't even have to be valid.
+
+# Spear phishing - using social engineering to trick victims to clicking
+# on malicious websites (it can be often designed to look like valid sites).
+# Attackers lull victims through this familiarity and get them to provide
+# their credentials. We could use all the functions we've written so far to
+# find a person's location, interests, hashtags, and craft a dummy message
+# using random choices.
+
+#####################################################################
+# Chapter 7
+#####################################################################
+
+# Antivirus engines failed to detect the virus Flame for years even though
+# it was sophisticated. This chapter will go through the process of creating
+# malware which goes undectected, which is trivial because most antivirus
+# vendors still use the same signature-based detection as their go to.
+# Metaspolit is a crafty little framework which generates malicious code
+# for us. Pyinstaller can be used to convert python scripts to executables.
+
+# The author goes through writing a script which uploads malware to a website
+# and check whether it went by undetected. The way to do this is to send a
+# post request and, while the status code isn't 302 (redirect), stay there.
