@@ -91,4 +91,34 @@ section of POST requests]
 
 - Applications even go as far as processing the User-Agent to optimize it based on the machine.
 
+* Many apps contain hidden fields within their forms to control what happens after submission. Cookie parameters may also exist. Two types of message bodies are common during form submissions: x-www-form-urlencoded and multipart/formdata. The enctype attribute is required in forms using the latter. It is in these type of requests which you so the long list of parameters in the message body broken up by "------"'s and stuff like that.
 
+- The core API used in Ajax is XMLHttpRequest. 
+
+* Encoding
+
+- URLs are encoded so that problematic characters (like spaces) are taken care of. This is why you see a bunch of random stuff like %20 etc while making HTTP requests. 
+
+%3d — =
+%25 — %
+%20 — Space (this is akin to the + character)
+%0a — New line
+%00 — Null byte
+
+
+- What is unicode? It is an encoding system designed to take care of the world's character set. This works similarly to the URL encoding system in that it has its own symbol for certain characters, preceded by %u.
+
+%u2215 — /
+%u00e9 — é
+
+UTF-8 uses each character's byte in hexadecimal preceded by %. 
+
+- You've used HTML encoding before (characters such as &nbsp;).
+
+- Base64 encoding, allows any binary data to be presented as ASCII characters. This one is pretty prominent and can be recognized if there's == signs at the end or by their specific character set. 
+
+- Hex encoding, like base64, always decode these things if they've been sent back from the server
+
+* The best way to explore a website to attack is manually, with a proxy/spider logging requests in the background. After this, follow all links, submit all forms, yada yada.
+
+- 302 found may give you a location header on the response as a redirect, meaning only authenticated users have access to the content. 
