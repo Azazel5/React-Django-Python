@@ -1,0 +1,94 @@
+Rule 1: almost all attacks happen because of unchecked user input
+
+We have to assume all user input is going to be malicious and move accordingly. Sanitize input,
+check input at different stages, and having a good system to detect and respond to attacks.
+
+* Request Headers
+
+- The HTTP protocol is one of the most widely used technologies on the web. It is connectionless.
+
+- The referer header simply points to where the request originated from: for example, clicking on
+a link leads a website A to go to A.com/link, then the referer for the request would be A.com.
+
+- The hostname is required because multiple websites could be hosted on the same server.
+
+* Response Headers 
+
+- Server header specifies which server software is being used
+
+- Set-cookie sets a cookie (how surprising!!) to be used in later requests 
+
+- Pragma headers instructs browser to not store response in cache
+
+Here are some other types of requests that I didn't have an idea about:
+
+HEAD, basically a GET request without the response body. It's useful to check if the resource exists before
+doing a GET.
+
+TRACE, for diagnostic purposes. Checks whether the request message and response body is the same (may be
+manipulated when there are proxy servers acting as middlewares in requests)
+
+OPTIONS, for HTTP methods available for resources
+
+PUT, is a dangerous one. If it's enabled, you can upload a script and run it on the server.
+
+This is the format of URLS: protocol://hostname[:port]/[path/]file[?param=value]
+
+- Port is only included if the host's port is different from the one used by the protocol.
+
+* HTTP headers 
+
+1. General
+
+    1.1. Connection - Close the connection or keep-alive for further messages 
+    1.2. Content-Encoding - encoding for the message body, such as gzip
+
+2. Requests 
+
+    2.1. Accept encoding - what kind of encodings the client is willing to accept 
+    2.2. If-Modified-Since - when the browser last received the resource. If the resource hasn't
+                             changed since this time, send the status code 304 (not modified).
+
+3. Response 
+
+    3.1. Cache control
+    3.2. ETag - used in conjunction with the If-None-Match request header 
+    3.3. Location - redirection, usually with status codes starting with 3
+    3.4. WWW-Authenticate - kinds of authentication supported
+
+- Servers issue cookies using the Set-Cookie response header. Then the browser sets the cookie in 
+all subsequent requests. Multiple cookies may be set, which will be seperated by ; in the Cookie header.
+Eg. Cookie: cookie1;cookie2;cookie3
+
+- The Set-Cookie header can also contain other information such as expires, domain (for which the cookie
+is valid), path, secure (so it only applies in HTTPS), and HttpOnly (cannot be accessed on the client side).
+
+* Status codes
+
+1xx — Informational.
+2xx — The request was successful.
+3xx — The client is redirected to a different resource.
+4xx — The request contains an error of some kind.
+5xx — The server encountered an error fulfi lling the request
+
+
+- The main difference between HTTP and HTTPS is that the former is not encrypted, so an attacker can 
+see everything is she is positioned on the right side of the network. HTTPS uses SSL (secure socket
+layer). 
+
+* When a proxy server is used, there are two differences in how HTTP works
+
+- If it's a HTTP request, the proxy server gets the hostname and the port (which is placed fully by
+the browser in the request) which forwards the request to the correct destination server.
+
+- If it's a HTTPS request, the browser can't perform the SSL handshake with the proxy server. Thus,
+the browser uses the proxy as pure TCP relay, using which we can perform the SSL handshake. Using a 
+proxy server is a good tool to have in your arsenal to intercept requests from your browser to the 
+target website.
+
+[Remember that parameters can be sent either via query strings, REST style URLs, cookies, or the body
+section of POST requests]
+
+- Applications even go as far as processing the User-Agent to optimize it based on the machine.
+
+
