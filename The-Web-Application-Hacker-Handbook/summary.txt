@@ -122,3 +122,76 @@ UTF-8 uses each character's byte in hexadecimal preceded by %.
 * The best way to explore a website to attack is manually, with a proxy/spider logging requests in the background. After this, follow all links, submit all forms, yada yada.
 
 - 302 found may give you a location header on the response as a redirect, meaning only authenticated users have access to the content. 
+
+- Keep in mind, things like the Server header returned by the Server may be falsified just like how you falsify the User-Agent
+header itself. Still, servers can be fingerprinted, using services such as Httprecon. File extensions, default framework error pages,
+etc are all things to look for. 
+
+With that being said, here is a roadmap of the rest of the book. These are the things typically involved in writing a 
+proper web app, so all of these are fair game.
+
+    Client-side validation — Checks may not be replicated on the server
+
+    Database interaction — SQL injection
+
+    File uploading and downloading — Path traversal vulnerabilities, stored cross-site scripting
+
+    Display of user-supplied data — Cross-site scripting
+
+    Dynamic redirects — Redirection and header injection attacks
+
+    Social networking features — username enumeration, stored cross-site scripting
+
+    Login — Username enumeration, weak passwords, ability to use brute force
+
+    Multistage login — Logic flaws
+
+    Session state — Predictable tokens, insecure handling of tokens
+
+    Access controls — Horizontal and vertical privilege escalation
+
+    User impersonation functions — Privilege escalation
+
+    Use of cleartext communications — Session hijacking, capture of credentials and other sensitive data
+
+    Off-site links — Leakage of query string parameters in the Referer header
+
+    Interfaces to external systems — Shortcuts in the handling of sessions and/or access controls
+
+    Error messages — Information leakage
+
+    E-mail interaction — E-mail and/or command injection
+
+    Native code components or interaction — Buffer overflows
+
+    Use of third-party application components — Known vulnerabilities
+
+    Identifiable web server software — Common configuration weaknesses, known software bugs
+
+Bypassing Client Side controls
+------------------------------
+
+- Once again, the core security issues in web apps occur because users can submit arbitrary input. One of the 
+most common ways in which data is transferred from client to server is via forms, but the thing is, the data 
+might be modified. For instance, if the app uses a third party software, such as a shopping cart, the only way 
+for data transmission is through the client. 
+
+* Hidden HTML form elements - Prices in retail websites used to be kept in these! In this day and age, you can
+edit that easily using chrome developer tools, but you can also use an intercepting proxy. 
+
+* Cookies - can be intercepted and changed just like above. 
+
+* URL parameters of course
+
+* Strangely, the referer header - this shows where the original source of the request. The assumption is that this is
+reliable. Example - if a password reset was requested from a particular resource, it is valid. But we can simply send out
+this request from the get go and change the referer header for the request to go through. 
+
+What to do about opaque data? People might encrypt the data being sent in any of these ways.
+    1. The app may contain functions to decrypt this for you. 
+    2. Copy the value of another item and paste it in this
+    3. The server most likely performs validation after decrypting strings like these. Send out malformed variations of this.
+
+
+If you think you're encountering a base 64 encoded string: if your attempts to decode a Base64 string do not uncover anything
+meaningful, try starting from four adjacent offsets into the encoded string. Sometimes you may see gibberish.
