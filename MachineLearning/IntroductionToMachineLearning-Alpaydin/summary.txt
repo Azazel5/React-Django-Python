@@ -1,0 +1,47 @@
+""" Headings are seperated by --- lines
+    Subheadings = *
+    Important point = -
+"""
+
+Introduction
+------------
+
+Machine learning builds off of the idea that in the modern age, people are producers and consumers of data.
+Patterns exist in data which can be leverged for profit maximization. At a high level, we use a model with
+a set of parameters and the machine's job is to fine tune these parameters (and thus making them more 
+accurate) using previous experience or training data. 
+
+* Types of machine learning applications
+
+Basket analyisis: people who buy wines are also more likely to buy wine openers for example. This is 
+reminiscent of conditional probability. 
+
+Classification: credit scores are a classification problem i.e. classifying whether a customer is 
+high risk or low risk for the financial instituition to lend money to. Discriminant (remember the 
+quadratic formula?) seperates different classes. 
+
+- Learning a rule also allows us an opportunity for knowledge extraction. Knowing the discriminant
+for low risk customers, we can find the properties of these classes. Using the properties, targeting
+these classes becomes easier. 
+
+Regression: Instances where the output is a single number is a regression problem. Regression and classification
+are examples of supervised learning. In these problems, there's an input, an output, a function/rule (
+regression function or discriminant) and we're trying to minimize the approximation error as much as 
+possible. The main difference between supervised and unsupervised learning is that, in the former, the 
+supervisor provides the correct value. The latter works simply by finding patterns.
+
+- Clustering is a method of density estimation
+
+Don't think that outliers in the data aren't valuable; in fact, these outliers may be hidden niches which
+may be further exploited by the company. Example - diapers. 
+
+Reinforcement learning: What if the output you want is not a single number or a classification? What if 
+you want a series of actions (for example, a chess playing agent)? In this case, the important thing is
+the policy of actions. 
+
+Supervised learning
+-------------------
+
+The data in this kind of machine learning application is labelled which works as the supervisor guiding
+the validity of choices that the agent makes. We pick several attributes as our main focuses; for example,
+for finding a family car, we pick price x1 and engine power x2, although many others could've been picked.
