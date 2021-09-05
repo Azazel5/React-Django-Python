@@ -45,3 +45,20 @@ Supervised learning
 The data in this kind of machine learning application is labelled which works as the supervisor guiding
 the validity of choices that the agent makes. We pick several attributes as our main focuses; for example,
 for finding a family car, we pick price x1 and engine power x2, although many others could've been picked.
+We have to find a hypothesis class to focus on and then the machine learning algorithm will work on fine
+tuning the parameters. 
+
+If classifying is about finding a boolean output for some input, regression is about finding the optimal
+function which minimizes empirical error. Sometimes, the data itself isn't enough for the application to 
+find a unique solution (also called an ill posed problem). In such cases, we rely on the inductive bias. 
+In fact, learning is just not possible without inductive biases because the sky's the limit. When doing
+regression, you can choose more and more complex functions, but, although they're more accurate than linear,
+they will pose you more headaches down the line. Which biases to go for seems to be the problem and this is 
+where model selection comes in. 
+
+- For best generalization AKA how well your agent answers questions not in the training data, we should 
+match the complexity of hypothesis class with complexity of function underlying the data. 
+
+- Divide your entire dataset into two parts: training and validation. The hypothesis that is most correct
+on the validation set is the correct one. Since the validation set is used to choose the best model, 
+splitting the data into a third test set is also a great idea. 
