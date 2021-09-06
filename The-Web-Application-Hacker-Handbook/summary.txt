@@ -221,3 +221,36 @@ paste the encrypted string of a cheaper product).
 
 * The server side should be aware of the validation schemes used on the client side because if the data somehow still came to the server,
 one can be more sure that something malicious is going on for certain. 
+
+Attacking Authentication 
+------------------------
+
+Most applications are content with using HTML forms to do authentication. In high risk applications, 
+people nowadays use two factor or multi-stage authentication. First and foremost, we have the bad 
+password, which can be easily brute forced. Try to register for an account and see the kind of password
+rules the application has in place. The best way, I would say, is to limit the number of wrong guesses 
+any user can make before locking the account. Holding the "Failed Password Attempts" variable in a cookie 
+or session is bad because an attacker can simply intercept and send whatever request they want. 
+
+The author recommends making requests with known usernames and unknown ones in an attempt to view the
+different server responses you receive. Verfiy whether the app has an account lockout scheme for 
+failed requests. 
+
+Typically, if some data is transmitted over an unencrypted HTTP connection, it can be easily snooped or 
+sniffed out. However, even HTTPS connections' data can be compromised if the application hasn't handled 
+it well enough. Obviously, put POST request credentials in the request body and not query parameters! 
+Do not redirect to a different URL on login! Password change requests need to be authenticated.
+
+Forgot password functionalities contain different challenges (such as mother's maiden name) which is much 
+easier than brute forcing a password. The most secure way to handle a password reset is: 
+
+            One reasonably secure means of implementing this is to send a unique,
+            unguessable, time-limited recovery URL to the e-mail address that the
+            user provided during registration. 
+
+Make sure the email address is the one that the user used while registering, otherwise an attacker could 
+just specify his own email address. After each password reset, you must sent an email to the user to 
+notify them. 
+
+* The remember me functionality is insecure by design. Facebook's remember me is secure AKA one which 
+remembers the username but makes you type in a password the next time you visit. 
