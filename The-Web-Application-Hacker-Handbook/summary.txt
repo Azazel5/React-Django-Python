@@ -195,3 +195,29 @@ What to do about opaque data? People might encrypt the data being sent in any of
 
 If you think you're encountering a base 64 encoded string: if your attempts to decode a Base64 string do not uncover anything
 meaningful, try starting from four adjacent offsets into the encoded string. Sometimes you may see gibberish.
+Remember that the ASP.NET platform has a ViewState object which keeps track of many user session data. Usually this is protected
+by a hash (MAC protection), but if some app has disabled it... party time baby. 
+
+- If you attempt to tamper with HTML forms and you get a Not Modified error code, it is most likely because the browser posseses
+a cached version of the resource (can be identified by the If-Modifed-Since or If-None-Match headers). Status codes 304
+can be circumvented simply by removing these headers. 
+
+- Browser extensions used are another avenue for attack. The author mentions that there are two main ways to attack browser
+extensions: normal request/response interception with a proxy and decompiling the bytecode. For the former, there may be a 
+problem of data serialization i.e. you can't understand a thing before deserializing it. To look at bytecode, first you have 
+to find the code download URL in the HTML source. Then, depending on which platform's bytecode it is (Java, Flash, etc), decompile 
+it, edit the source, and recompile it. How do you actually use your recompiled bytecode? Replace the physical file with yours or
+intercepting proxy. 
+
+- Sometimes, as an added security measure, even the bytecode is obfuscated. There are many measures you can take against this.
+
+- On an unrelated note, you can totally execute the bytecode to see what happens too. For example, if the bytecode has been traslated
+to be a java program, just add a main function and execute it using the command line! If all this is too much, use the 
+debugger, which works at the bytecode level. Even native code can be reverse engineered when websites require native access.
+
+- Make sure to hold critical data on the server. If you don't do this, make sure that your critical data on the client is encrypted
+and encrypted well, such that no replay attacks can occur (if you just use base64 or something for a product, then an attacker can copy
+paste the encrypted string of a cheaper product). 
+
+* The server side should be aware of the validation schemes used on the client side because if the data somehow still came to the server,
+one can be more sure that something malicious is going on for certain. 
