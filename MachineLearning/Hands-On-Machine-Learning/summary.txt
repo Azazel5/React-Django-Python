@@ -1,0 +1,58 @@
+Introduction
+------------
+
+Machine learning is great for complex, real world problems where the situation is dynamic and ever changing.
+
+Some example applications of machine learning:
+
+* Image classification is traditionally done via CNNs (Convolutional Neural Networks)
+* Semantic segmentation -> labelling each pixel of an image with a class of what is being represented. Used
+in detecting tumors in brain scans via CNNs
+* Text classification and NLP, done via RNNs (Recurrent Neural Networks), CNNs, or Transformers
+* Anomaly detection - example, credit card fraud
+* Regression, SVMs (Support Vector Machines), Random Forests
+* Clustering, segregating classes of data
+
+! Types of machine learning systems
+
+1. Supervised, Unsupervised, Semisupervised, and Reinforcement learning
+
+* Feature extraction is a technique used in dimensionality reduction AKA when the data is pretty complex and
+you want to simplify it as much as possible without losing any information. Example, if we find that a human's
+interests is strongly dependent on age and gender, we could combine these two feature into one bigger feature.
+
+An example of semisupervised learning algorithm: DBNs (Deep Belief Networks) are based on RBMs (Restricted 
+Boltzmann Machines)
+
+Reinforcement learning is based around rewards and policies. Each action that an agent takes has a cost, 
+which may be positive or negative. The goal of the agent is to maximize reward and minimize penalties,
+which it does via the policy which dictates what action it should take in which situation.
+
+
+2. Batch and Online learning 
+
+Batch learning systems learn everything at once and is incapable of learning from a stream of incoming data 
+making it inflexible. Online learning is fed mini-batches of data and can adapt to new incoming data nicely.
+
+* An important parameters for online learning systems is the learning rate. 
+High rate = may forget old data more quickly but adapts to new data well
+Slow rate = more inertia but less sensitive to outliers and noise
+
+* Monitoring is important in online learning systems because bad data means a decline in the system's 
+performance. There should be options to switch off learning, revert to an earlier stage, or react to abnormal
+data using an anomaly detection algorithm for instance. 
+
+3. Instance Based versus Model Based 
+
+Instance based learning is a trivial kind of generalization where it learns the training data by heart and 
+tests the new data by the similarity in any feature; for example, it could say that an email is spam if it 
+contains a similar number of words as it saw in spam emails in its training dataset. 
+
+On the other hand, we could select a model with a set of attributes to make generalizations. Here the algo
+selects parameters and evaluates them using a fitness function. 
+
+* For regression, people use cost functions which measure how far off your model's prediction is as compared 
+to the training data. The goal is to minimize the cost function's output. 
+
+* Training a model means finding the best set of parameters which maximizes fitness function, so it can be 
+used with fresh, real world data for prediction. 

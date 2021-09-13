@@ -254,3 +254,10 @@ notify them.
 
 * The remember me functionality is insecure by design. Facebook's remember me is secure AKA one which 
 remembers the username but makes you type in a password the next time you visit. 
+
+* Duplicate usernames is also a really bad practice. Rather than assigning usernames yourself via some 
+pattern, let users assign their own usernames, but have them be unique! 
+
+* If db.getUser generates a nullpointer, the login csn go through, which is an implementation error that
+the authors found in the login of a large bank. The way to go about penetration testing is to send out 
+requests which the application doesn't expect i.e. edge cases and seeing how the application responds.
