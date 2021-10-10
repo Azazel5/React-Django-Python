@@ -56,3 +56,75 @@ to the training data. The goal is to minimize the cost function's output.
 
 * Training a model means finding the best set of parameters which maximizes fitness function, so it can be 
 used with fresh, real world data for prediction. 
+
+* Major problems in machine learning include insufficiency of data/bad data or choosing a bad algorithm.
+
+* Ways to reduce overfitting is to select a model with fewer parameters, select fewer attributes, or get more
+data.
+
+* A hyperparameter is a parameter of the learning algorithm itself and not the model.
+
+* Ways to reduce underfitting is, as you might've guessed, opposite. 
+
+! Testing and Validating
+
+Split your dataset into a training and testing set. Calculating the error rate is important!
+If training error is low and testing error is high = overfitting
+
+* It's common to go for a 80:20 (training testing) split, but depending on how large the dataset is, you can
+change the ratio. What if you're deciding in between several models and want to select the one which does the
+best? The solution is the validation set, purely to evaluate models. You can train several models with 
+differing hyperparameter values to see which performs the best on the set. The best one is selected and is 
+then trained on the full training set (including the validation set). 
+
+* The testing and validation sets must be representative of the data used in production! 
+
+End-To-End Machine Learning Project 
+-----------------------------------
+
+The first order of business calls for analyzing the problem: what exactly are we trying to solve? Looking at 
+the problem, it is clearly supervised, batch, and model based. This is a multiple regression problem, as we'll
+use several attributes in the data to make a decision. 
+
+Now we must define a performance measure (fitness function?). For regression, this can be a RMSE (Root Mean 
+Square Error). 
+
+* os.makedirs will make directories recursively even if they don't exist. If directory already exists, you 
+can specify exist_ok=True to not raise an OS exception. 
+
+Making a function which either downloads the data or scrapes it regularly is a pretty useful thing to create
+for an ML project. 
+
+* df.info() and df.head() are useful!
+
+Some attributes will have lesser number of values, which you need to take care of before training your model.
+You can find categories of certain series by pd["column_name"].value_counts() function.
+
+* There's also the describe function which gives other statistical information such as the mean, median, etc.
+
+Gotta understand how the data has been preprocessed. For instance, the median income was capped in the data 
+provided by the book. This is not a huge problem, but the same is not true for the capping of median housing
+value, which is what the algorithm is trying to predict. 
+
+* Having tail heavy or head heavy data is bad for ML algorithms; it is preferred to have a bell shaped graph.
+
+It is preferred to put away data for the test set right now! Splitting the test train set should be done 
+carefully so as to have the same test data even if the dataset is updated or the function is run again. 
+This is precisely why people use np.random.seed(42), to generate the same random numbers as before.
+
+* A good solution is to compute the hash value of each instance and put it in the test set if its value is
+less than or equal to 0.2 * maximum hash value. This ensures that the same data will be in the test set AND
+that the test set is 20% of the total set. 
+
+* The zlib crc32 function can be used to generate a checksum identifier for any piece of data.
+
+There are boolean operators available for pandas dataframes, such as data.loc[in_test] or data.loc[~in_test].
+Since the in_test_set returns a subset of the id columns which satisfied the test_check function, you can get 
+all columns which satisfy those requirements.
+
+If there isn't a unique identifier in the data, just use the row number (gotta make sure new data gets 
+appended to the end and no row gets deleted). If this isn't possible, make your own unique id column, 
+such as id = latitude + 1000 + longitude.
+
+* Random sampling is good when the dataset is large enough; however, if that's not the case, we run into the 
+risk of creating sampling bias.
