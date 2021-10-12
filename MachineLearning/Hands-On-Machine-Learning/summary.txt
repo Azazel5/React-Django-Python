@@ -128,3 +128,57 @@ such as id = latitude + 1000 + longitude.
 
 * Random sampling is good when the dataset is large enough; however, if that's not the case, we run into the 
 risk of creating sampling bias.
+
+Stratified sampling is a technique used to maintain the known ratio of something in the sample. 
+
+* The pd.cut() function can be used to represent a continuous variable in a categorical format. Example -
+the median salary - 5 distinct categories.
+
+Scikit-learn has many functions for splitting data into training/testing sets, so make sure to use that 
+instead. Here, we'll use the stratified split sampling function from the veteran library. Test sets 
+generated using pure random sampling will be skewed, so moral of the story: use stratified sampling.
+
+[!] Visualizing the data 
+
+After splitting the dataset into a test and train set, it is important to start visualizing the data. In 
+really big datasets, you may want to sample an exploration set which is small for quicker manipulations.
+Setting alpha=0.1 makes it easy to see the high density data points. You can specify a cmap (color map) to
+make things look better. 
+
+* Here the correlation coefficient comes in handy, especially because the dataset isn't too large. When 
+the correlation coefficient is close to 1, that means there's a strong correlation there. The corr coef 
+only finds linear relationships and completely misses out on others.
+
+The most crucial thing that visualizing data reveals is that there may be some things that you want to
+fix before proceeding with the ML algorithm. Also, you discover some associations which may come in handy.
+If tail heavy action happens, compute the logarithm. Also try combining attributes together. The example 
+given in the book is crisp: total number of rooms isn't very useful but number of rooms per household is (if
+you know enough to calculate that). 
+
+This doesn't need to be extremely thorough! It's just meant to get you started. Make sure to seperate 
+predictors and labels, since we're doing supervised ML right now. What we're trying to predict is median
+house value, so we will capture that in another variable.
+
+* The function df.drop returns a copy of the dataframe with the dropped row/column.
+
+[!] Cleaning the data 
+
+Here's comes the most boring (yet important so they say) part of ML! Here Scikit-learn shines again,
+with an awesome class which handles missing values AKA SimpleImputer. Say you pass the median strategy
+to the SimpleImputer class. Now you won't be able to use the ocean_proximity attribute anymore because it
+is categorical, so you have to make sure to remove that. The imputer replaces missing values with the 
+learned medians. 
+
+* Most machine learning algorithms prefer to work with numbers. So we can use another Scikit-learn function
+to encode the text to numbers. Also, one thing to understand is that how you put together categories matters.
+For example, an ML algorithm may assume that "two nearby values are more similar than two distant values",
+which may not be true. The fix is to go for "One-Hot Encoding" i.e. 0 or 1 for each category.
+
+After one-hot encoding, we get back a sparse matrix (with a lotta zeroes) because there could be thousands 
+of categories. 
+
+* If the number of categories for the attribute is too large (for example, a student's major), you could 
+represent this categorical information using a different attribute or a learnable, low-dimensional vector -
+this process is called embedding (its representation is learned during training AKA representational
+training). OOF, all this terminology.
+
