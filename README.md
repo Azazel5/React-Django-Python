@@ -8,6 +8,17 @@ Each invidual folder is a small project, tutorial, or notes on documentation whe
 Each folder is its own project, and it contains a text file which lists the project requirements.
 Here's a general overview of each project and some new things I learnt during the process
 
+* ML - Books on the field of machine learning, deep learning, or AI. 
+<br>
+The content that I've read includes:
+    1. Hands On Machine Learning - Aurelien Geron
+    2. Introduction to Machine Learning - Ethem Alpaydin
+    3. Andrew NG's Stanford Machine Learning Course <br>
+
+* The Web Application Hacker's Handbook - Learning about the details of every aspect that builds 
+together to form the web, what can be made vulnerable, and just how insecure most modern web systems
+are.
+
 * Realtime Communication with WebRTC - Gaining a hands on introduction to WebRTC APIs; learning more
 about peer-to-peer connections, mediaStreams, and more.
 
