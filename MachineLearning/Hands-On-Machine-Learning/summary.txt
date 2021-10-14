@@ -182,3 +182,68 @@ represent this categorical information using a different attribute or a learnabl
 this process is called embedding (its representation is learned during training AKA representational
 training). OOF, all this terminology.
 
+* The numpy.c_ function concatates objects along an axis. For instance, we got [1, 2, 3] and [4, 5, 6],
+np._c[arr1, arr2] ([ brackets!) gives 
+[
+    [1, 4],
+    [2, 5],
+    [3, 6]
+]
+
+Scikit-learn also makes it pretty simple to write your own classes, whether it be a transformer or whatever.
+The book proceeds to create a hyperparameter using a custom transformer class i.e. one which adds 
+bedrooms_per_household as a column values depending on the constructor. 
+
+* Machine learning algorithms don't perform well when the inputs have different scales, so feature scaling 
+must be performed. Two common ways to do this: min-max (normalization) scaling and standardization.
+
+- Normalization: make sure data ranges from 0 to 1. Subtract minimum value and divide by max - min AKA
+min / (max - min). Scikit-learn -> MinMaxScaler
+
+- Standardization: subtract the mean value and divide by standard deviation. This process does not produce 
+a range which might be a problem for neural networks, but is much less affected by outliers obviously.
+Scikit-learn -> StandardScaler
+
+Scikit also provides a pipeline class which can take in all these objects in a particular order too. You
+can add in everything from the imputer discussed above to the custom transformers you create.
+This approach led us to handle categorical and numerical columns seperately, but Scikit has a 
+ColumnTransformer which can handle all things at once. 
+
+* When giving the ColumnTransformer values, you can specify "drop" or "passthrough" if you want to drop 
+certain columns or want them to be left untouched. 
+
+Calculating the root mean squared error is a good idea for linear models. Naturally, Scikit has a function
+for that. The calculated RMSE value shows that we're underfitting heavily right now. So, let's pick a more
+powerful model i.e. the DecisionTreeRegulator. Using this, we get an error of 0, which isn't right.
+
+Clearly, we go through the case of selecting different models in the case of underfitting and overfitting. 
+This is why the validation set is important, which validates a model. We want to train the model which 
+performs the best on the validation set, which is finally tested with the test set. What a process. If 
+this is too much work, just use Sklearn's K-fold cross validation!! This function takes in the model,
+data, labels, scoring, and k (the number of folds). Using this, we can see that the Decision Tree is 
+actually worse than the Linear Regression.
+
+Let's try one more model: the RandomForestRegressor. This trains many Decision Trees based on random
+attributes and averages them out. Although this is better, it still shows overfitting.
+
+* The goal is to shortlist 2-5 best models. Save and load models using the Pickle or Joblib libraries.
+
+Now that you have selected some promising models, the goal is to make them as good as possible. This involves
+playing with parameters which is super boring. Sklearn to the rescue again with GridSearchCV. This search 
+involves cross validation too (hence the CV). You have to pass in a param grid with number esitmators, 
+max values, etc. 
+
+The book gives this example of such a param grid: param_grid = [
+   {'n_estimators': [3, 10, 30],
+    'max_features': [2, 4, 6, 8]},
+    {'bootstrap': [False],
+     'n_estimators': [3, 10],
+     'max_features': [2, 3, 4]}           
+]
+
+Total grid search will be 3 * 4 + 2 * 3 = 18
+Since we're using 5 fold CV, it'll be 18 * 5 = 90 training sessions
+This will give a lot of information through the best_params_ or best_estimator_ attributes. 
+
+What about when there are way too many features in the data to do this for? RandomizedSearchCV. 
+GridSearch can also demonstrate the importance of each feature's importance in making decisions.
