@@ -62,3 +62,13 @@ match the complexity of hypothesis class with complexity of function underlying 
 - Divide your entire dataset into two parts: training and validation. The hypothesis that is most correct
 on the validation set is the correct one. Since the validation set is used to choose the best model, 
 splitting the data into a third test set is also a great idea. 
+
+Classification problems can be k-class. The family car problem discussed in the book is a 2-class problem 
+because there are two classes: cars belonging to the family car type and cars which don't. We want to learn
+the boundary boxes seperating each class as clearly as possible.
+
+- Regression is the task of finding a numeric value; or rather, finding an appropriate function which
+minimizes the empirical error.
+
+- Linear regression can be modelled using polynomials too; they will increase the error but follow the 
+data more closely.

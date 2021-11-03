@@ -247,3 +247,58 @@ This will give a lot of information through the best_params_ or best_estimator_ 
 
 What about when there are way too many features in the data to do this for? RandomizedSearchCV. 
 GridSearch can also demonstrate the importance of each feature's importance in making decisions.
+
+After this the book dives into more detail of parameter fine tuning, but the moral of the story is:
+drop the parameters which don't affect the dataset too much. Now the time is to test the final model 
+with the test set. 95% confidence interval for generalization error is another idea as compared to
+the root mean square method.
+
+* Even simplistic models like ones which classify cats and dogs may need to be retrained over time
+because there are so many factors outside our grasp in the real world i.e. cameras may change, people
+may start dressing up dogs with hats and puss in boots. 
+
+Classification
+--------------
+
+The dataset has 70000 images with 784 features each because each image is 28 * 28 = 784.
+
+* Matplotlib can also show images, using the imshow function. However, these images may need to be 
+reshaped; for instance, I had to reshape a MNIST dataset instance to a 28 x 28 array. A binary classifier
+can detect a 0 or 1 or, in other words, instances of a class k and instances of a class not(k). 
+
+* The stochastic gradient descent class of Sklearn (SGDClassifier) is a good class for large datasets and
+for online learning. Set the random_state attribute! 
+
+Evaluating a classifier is much more tricky business than a regressor. One instance which demonstrates this 
+well is that the classifier we built for just detecting non-5 numbers has a 90% accuracy. This is because 
+encountering a number 5 has a base probability of about 0.1, so if the classifier just guesses not-a-5 every
+time it will have a 90% accuracy. Not what we want at all...
+
+A better way is to draw the confusion matrix i.e. number of times instances of class A was classified as class
+B. Each row in the matrix is an actual class and each column is a predicted class. Therefore, a perfect
+classifier has zeroes along its opposite diagonal or only true positives and true negatives. 
+
+* Precision, accuracy of positive predictions, must be used with a concept called recall because a classifier
+with just 1 true positive may be labelled as precise.
+
+It may be useful to create a metric which combines both precision and recall, often called the F1 score, the
+harmonic mean.
+
+* Harmonic mean takes the weight of lower weight values highly as compared to the normal mean. A classifier
+only does well if both precision and recall are high. 
+
+As always in machine learning, there is no rule which applies to all scenarios. You don't always want both 
+high precision and recall! Precision and recall have an inverse relationship. The SGDClassifier uses a 
+threshold value of 0 to determine what precision and recall it's going to get. However, we've seen that 
+a different threshold value affects these scores. What value to use? 
+
+* Pass "decision_function" instead of accuracy to cross_val_predict to get the decision scores. Now you can
+pass these values onto the precision_recall_curve to see what's up. You can search which threshold value 
+corresponds to a precision higher than 0.9 for instance, using np.argmax.
+
+* A high precision classifier isn't too useful if its recall is abysmal.
+
+The ROC curve - Receiver Opening Characteristic - plots the true positive rate against false positive rate.
+A good classifier has a normal ROC curve and it isn't edged out in any one area.
+
+* A perfect classifier has ROC area under curve = 1 and random classifier = 0.5 
