@@ -302,3 +302,20 @@ The ROC curve - Receiver Opening Characteristic - plots the true positive rate a
 A good classifier has a normal ROC curve and it isn't edged out in any one area.
 
 * A perfect classifier has ROC area under curve = 1 and random classifier = 0.5 
+
+Multiclass Classification
+-------------------------
+
+Multiple class classification can be done in many ways. For instance, you can train a binary classifier
+for each digits 1 to 10, and get the decision score from each classifier, and pick the highest one. There
+are also other ways this can be done, but the method described in generally preferred. 
+
+* The SVC class determines whether to use One-V-One or One-V-Rest by itself, but this too can be selected
+by using the appropriate classes from Sklearn.
+
+* Use Matplotlib's matshow function to see a nice visualization of the confusion matrix.
+
+After finding the right model to use, hypertuning its parameters, and calculating accuracy, we gotta do
+cross validation and other techniques described for error analysis. In the example used in the book, while
+using SGD, we noticed that the model was quite sensitive in differentiating 3's and 5's. Preprocessing images
+to make sure they're straight is a great tactic.
