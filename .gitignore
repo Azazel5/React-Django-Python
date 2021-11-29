@@ -166,3 +166,8 @@ packages/react-devtools-shell/dist
 *.zip
 *.pcap
 *.mmdb
+*.npy
+
+# Datasets
+catsVSdogs
+MNIST
