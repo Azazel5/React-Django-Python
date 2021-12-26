@@ -1,46 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <title>Console Tricks!</title>
+    <meta charset="UTF-8">
+    <title>Console Tricks!</title>
 </head>
+
 <body>
 
-  <p onClick="makeGreen()">×BREAK×DOWN×</p>
+    <p onClick="makeGreen()">×BREAK×DOWN×</p>
 
-  <script>
-    const dogs = [{ name: 'Snickers', age: 2 }, { name: 'hugo', age: 8 }];
+    <script>
+        const dogs = [{ name: 'Snickers', age: 2 }, { name: 'hugo', age: 8 }];
 
-    function makeGreen() {
-      const p = document.querySelector('p');
-      p.style.color = '#BADA55';
-      p.style.fontSize = '50px';
-    }
+        function makeGreen() {
+            const p = document.querySelector('p');
+            p.style.color = '#BADA55';
+            p.style.fontSize = '50px';
+        }
 
-    // Regular
+        // Regular
+        console.log("Hello")
 
-    // Interpolated
+        // Interpolated
+        console.log("Hello I am a %s string!", "poop")
 
-    // Styled
+        // Styled
+        console.log("%c I am stylish text", "font-size: 40px; font-style: italic;")
 
-    // warning!
+        // warning!
+        console.warn("Sheit boi")
 
-    // Error :|
+        // Error :|
+        console.error("Error")
 
-    // Info
+        // Info
+        console.info("info")
 
-    // Testing
+        // Testing
+        console.assert(1 === 1)
 
-    // clearing
+        // clearing
+        console.clear()
 
-    // Viewing DOM Elements
+        // Viewing DOM Elements
+        // console.dir(variable) gives the attribute list of the variable
 
-    // Grouping together
+        // Grouping together
+        dogs.forEach(dog => {
+            console.group(dog.name)
+            console.log(`Dog ${dog.name} is ${dog.age} years old`)
+            console.log(`Dog ${dog.name} is ${dog.age * 7} dog years old`)
+            console.groupEnd(dog.name)
+        })
 
-    // counting
+        // counting
+        console.count('Subhanga')
+        console.count('Subhanga')
 
-    // timing
+        // timing
+        console.time("Fetching")
 
-  </script>
+        // Do time related stuff here
+        console.timeEnd("Fetching")
+
+        console.table(dogs)
+
+    </script>
 </body>
+
 </html>
