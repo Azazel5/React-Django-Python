@@ -1,0 +1,15 @@
+We are trying to measure and understand the factors of variance of
+features through ML algorithms, some of which may be obvious to humans
+but tough to understand for machines i.e. a person's accent to determine
+where they're from for instance. Deep learning combines several simpler
+elements together to form a deeper understanding of the entity. 
+
+Now the book goes on to describe (in brief) a history of how the field
+of deep learning emerged, dipped, and rose back, through the story of
+multi-layer perceptrons, the inability to solve XOR, and back to its
+popularity today, thanks to increasing computational ability of machines,
+GPUs, and such.
+
+At this point, the books provides a review of mathematical concepts required
+to understand deep learning. After this, we're good to go to learn this field!
+

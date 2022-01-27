@@ -319,3 +319,23 @@ After finding the right model to use, hypertuning its parameters, and calculatin
 cross validation and other techniques described for error analysis. In the example used in the book, while
 using SGD, we noticed that the model was quite sensitive in differentiating 3's and 5's. Preprocessing images
 to make sure they're straight is a great tactic.
+
+
+REREAD JAN 2022
+
+- It's a good practice to use dimensionality reduction on your training data before feeding it to your ML
+algorithm to speed up runtime, take less disk space, etc.
+
+- Stratified sampling is cool!
+
+- When one hot encoding of categorical variables isn't possible, use representational learning or replace
+the feature with something numerical related to the categories. Eg. Ocean proximily categories can be
+relplaced by distance from the ocean (numerical). 
+
+- Try and use transformers.
+
+- Scale different features such that they are in similar formats. Eg. one column in the dataset, 
+# of rooms in a house, ranges from x - y but another goes from p - q. This will be a problem. Two common
+was to do this is min-max scaling (normalization) and standardization. Scikit learn has all of these.
+
+As with all transformers, fit scalers only to training data, then transform training and test. 
