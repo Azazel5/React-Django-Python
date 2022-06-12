@@ -1,0 +1,19 @@
+OWASP ZAP
+---------
+
+- Tons and tons of tools available here, we'll be taking a look at em one by one
+
+Quick scan - as the name says
+Manual scan - lets you open a browser and manually explore vulnerabilites. If you enable HUD (heads up display),
+it becomes even more powerful.
+
+- If the HUD frames hide a lot of information, press the green button to hide it
+- The history/Web sockets keeps a record of all requests/responses made in the website. Also, you can change
+the payloads for the request and re-send it, just like Firefox. The sites tool makes it easy to see which
+particular pages made the HTTP requests and the history tab is conveniently opened on click.
+
+- Using the 'break' utility, you can change requests on the fly i.e. intercept it, change the payload/headers,
+send it again. Useful when the frontend validations disable some values but there's no server side checks.
+
+Active scan: enable after looking through the application thoroughly
+Attack mode: helpful to be run before looking through the application

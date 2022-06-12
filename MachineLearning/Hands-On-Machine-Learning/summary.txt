@@ -338,4 +338,11 @@ relplaced by distance from the ocean (numerical).
 # of rooms in a house, ranges from x - y but another goes from p - q. This will be a problem. Two common
 was to do this is min-max scaling (normalization) and standardization. Scikit learn has all of these.
 
-As with all transformers, fit scalers only to training data, then transform training and test. 
+- As with all transformers, fit scalers only to training data, then transform training and test. 
+
+- For classifiers, look at the confusion matrix rather than accuracy
+
+- Scikit learn has cross_val_score and cross_val_predict functions, the first returns scores and the
+second returns predictions per fold. 
+
+- KNearestNeighbors classification supports multi-class classification.

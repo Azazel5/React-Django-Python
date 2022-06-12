@@ -1,0 +1,43 @@
+SQL INJECTIONS
+--------------
+
+Inj.1 - Retriving hidden data
+.............................
+
+- Assuming a website with URL: https://insecure-website.com/products?category=Gifts'--
+This results in a particular SQL query: SELECT * FROM products WHERE category = 'Gifts'--' AND released = 1
+
+- What exactly is the '--'?
+A -- is an SQL comment. Anything after this in a query is not applied.
+We can also view products in categories that the attacker doesn't know about AKA
+
+https://insecure-website.com/products?category=Gifts' + OR + 1=1--
+
+This will return all items.
+
+Inj.2 - Subverting application logic
+....................................
+
+- If an app uses a SQL where query to check for username and password, 
+an attacker can inject a '--' after the username check to ignore the
+password check. 
+
+Inj.3 - Retriving data from other database tables
+.................................................
+
+- Never return an SQL query as an application response because this lets
+attackers use the UNION keyword i.e. an additional SQL query.
+
+query: SELECT name, description FROM products WHERE category = 'Gifts'
+injection: ' UNION SELECT username, password FROM users--
+
+First order injection = application takes user input for HTTP request and processes the input as SQL statement and executes it
+Second order injection = application takes user input for HTTP request but stores it in a DB. While performing a different
+request, the original is taken from the DB and is executed. 
+
+Authentication
+--------------
+
+- Remember, the host parameter in the web is the request originator. 
+- Always return the same status code for an incorrect username/password combination. Some websites return a different status
+code for one, which will lead the attacker to believe one was correct. Same with error messages and response times (tricky eh?)
