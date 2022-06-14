@@ -39,5 +39,26 @@ Authentication
 --------------
 
 - Remember, the host parameter in the web is the request originator. 
+
+Auth.1 - Username enumeration and password brute forcing
+........................................................
+
 - Always return the same status code for an incorrect username/password combination. Some websites return a different status
 code for one, which will lead the attacker to believe one was correct. Same with error messages and response times (tricky eh?)
+- The OWASP ZAP fuzzer is great for this
+
+Directory Traversal
+-------------------
+
+Dir.1 Reading arbitrary files
+.............................
+
+- If an image is attached from the /var/www/images folder using a path parameter like loadfile?img1.png, a ../../../etc/passwd
+can be attached to obtain and read the password file from the server.
+- If a website strips file traversal operations, you can use nested file traversals which'll work after the outer ones get
+stripped. Example - ...../ or something like that. These sanitations can sometimes also be bypassed by URL encoding the
+traversal characters.
+- There are literally thousands of situations and attacks possible, as this tutorial shows. For instance, a particularly
+interesting one is: if an application requires the filename to end in .jpg, you could do a file traversal with a null-byte
+at the end i.e. ../../../etc/passwd%00.png (null byte ends the string)
+- Just don't let user-supplied information affect the filesystem.

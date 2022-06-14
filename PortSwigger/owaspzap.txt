@@ -17,3 +17,14 @@ send it again. Useful when the frontend validations disable some values but ther
 
 Active scan: enable after looking through the application thoroughly
 Attack mode: helpful to be run before looking through the application
+
+Passive scan is completely safe as it only checks the requests and responses. Active scan uses attacks.
+It also produces reports on problems found and how to solve them
+
+- There are also ZAP extensions!! It can scan ports as well.
+- OWASP ZAP can also automate these security tests, which is good because security needs to be present in each
+stage of the software development lifecycle, just like QA testing. 
+
+Awesome way: run Selenium tests but proxy them through ZAP!
+
+- "Context is a bunch of URL regexes which define which URLs are to be included or excluded". Added to score by default.
