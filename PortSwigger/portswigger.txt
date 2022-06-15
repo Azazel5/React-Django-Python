@@ -62,3 +62,25 @@ traversal characters.
 interesting one is: if an application requires the filename to end in .jpg, you could do a file traversal with a null-byte
 at the end i.e. ../../../etc/passwd%00.png (null byte ends the string)
 - Just don't let user-supplied information affect the filesystem.
+
+OS Command Injection
+--------------------
+
+OCI.1 Executing arbitrary commands
+..................................
+
+- & is the shell command seperator. So, if you know that a certain feature is using shell commands, try injecting input such as
+command & echo "Using shell commands" to test OS command injection.
+- If an API endpoint takes in parameters, try injecting OS commands like echo or whoami in there. However, for some reason, the
+parameter only was injectable by giving it one valid argument and then a | OS_command_here. 
+- Knowing that system is vulnerable to this kind of injection can be destructive/informative (you can find out tons of 
+info about the system)
+- If the system doesn't return any information about a shell command being run, this is a blind command injection.
+
+So this begs the question, how would you detect these?
+
+OCI.2 Detecting blind OS command injection using time delays
+............................................................
+
+- The ping command in linux allows you to send a certain number of ICMP packets. Not sure how this makes it happen, but it'll
+create a time delay and thereby allow you to know whether a command was run or not.
