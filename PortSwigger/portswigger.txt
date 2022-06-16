@@ -79,8 +79,20 @@ info about the system)
 
 So this begs the question, how would you detect these?
 
-OCI.2 Detecting blind OS command injection using time delays
-............................................................
+OCI.2 Ways to inject blind OS command injection
+...............................................
+
+TIME DELAYS
 
 - The ping command in linux allows you to send a certain number of ICMP packets. Not sure how this makes it happen, but it'll
 create a time delay and thereby allow you to know whether a command was run or not.
+
+REDIRECTING OUTPUT
+
+- Since most systems don't return the output given by OS commands, you can add additional redirection commands to determine when
+a blind OS command injection is possible.
+
+There's a bunch of characters which you can inject into vulnerable spots to elicit reactions from the server like &, |, `, etc.
+All this is also dependent on the kind of system being used.
+
+Best way of protection: never call OS level commands from application code.
