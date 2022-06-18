@@ -96,3 +96,27 @@ There's a bunch of characters which you can inject into vulnerable spots to elic
 All this is also dependent on the kind of system being used.
 
 Best way of protection: never call OS level commands from application code.
+
+Broken Access Control
+---------------------
+
+- This is a vulnerability which takes advantage of different resources being available for different groups, with not enough
+controls for securing it. 
+
+Example - the admin site not being locked down properly
+
+BAC.1 Broken access control resulting from platform misconfiguration
+....................................................................
+
+- Some applications deny endpoints at the platform level, which may be overriden by some sepcial request headers. If a
+skiller hacker knows this, he'll take advantage of it.
+- A good way to find vulnerabilites is to make tons of requests through ZAP, add the website to your context if you have to,
+and just search through everything to find the kind of response you want, whether it be cookies, the actual response, the request
+or whatever.
+
+Note of the day - the key in security/hacking is to be carefully open-minded to a robotic level; your answer could lie literally
+anywhere, so be prepared to check anywhere, everywhere, all at once.
+
+- User id's controller by parameters are obviously insecure
+- User id's passed in by unpredictable UUID's are also insecure as they may be revealed elsewhere, like in comments, likes, or
+whatever else

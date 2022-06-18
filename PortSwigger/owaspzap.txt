@@ -28,3 +28,6 @@ stage of the software development lifecycle, just like QA testing.
 Awesome way: run Selenium tests but proxy them through ZAP!
 
 - "Context is a bunch of URL regexes which define which URLs are to be included or excluded". Added to score by default.
+
+- There's a scripts tab which lets you write scripts regarding a lot of things, check it out! It has a bunch of scripts
+available by default. Inbuilt support for JS, Python, or Ruby.
