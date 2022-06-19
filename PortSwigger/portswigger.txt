@@ -120,3 +120,73 @@ anywhere, so be prepared to check anywhere, everywhere, all at once.
 - User id's controller by parameters are obviously insecure
 - User id's passed in by unpredictable UUID's are also insecure as they may be revealed elsewhere, like in comments, likes, or
 whatever else
+
+- Insecure direct object references is when the server stores objects (such as chat logs), which may be taken advantage of.
+- The Referrer header is added by website to show which request originated from where (particularly which page). If there's
+an area of the website which only needs to originate from a particular place, and there's no other access control available
+besides the Referrer headers, well.. zannen desune.
+
+File upload vulnerabilities
+---------------------------
+
+- When creating an uploading functionality, at the very least, you should be validating the name, type, content, and size of the
+file, among other things.
+
+FUV.1 Exploiting unrestricted file uploads to deploy a web shell
+................................................................
+
+- A simple example is uploading a php file which prints out the system's id. After the upload, the file is requested for using a
+GET, and it triggers the script to run.
+
+FUV.2 Exploiting flawed validation of file uploads
+..................................................
+
+Normal form data: application/x-www-form-url-encoded
+Binary form data: multipart/form-data
+
+- Form data is broken into Content-Dispositions i.e. squiggly lines and some data about what the field
+is and its name (this is of course hidden to you, but you can view them if you view the actual source
+in Chrome Devtools or Postman). Sometimes these individual fields have a ContentType header which may
+be what the website or server checks as validation. These values shouldn't be blindly trusted because,
+as we've seen, they can easily be changeable by using OWASP Zap or Burp Suite.
+
+- Sometimes, the server will be configured to only execute files of a certain type, so even if a php/js
+file slips through the cracks, it'll return the file text or an error as response. Generally, user
+directories as much more securely locked down, so if you use directory travsersal and upload the file
+to a directory implicitly considered secure, you might be able to run the script.
+
+- Your requests will often be handled by additional servers behind the scenes, which may also be configured 
+differently.
+
+- Blacklisting filetypes doesn't work as people will always find weird filetypes which can be executable.
+- Even if servers blacklist some types of files, if a malicious config file (like an Apache .htaccess) is
+uploaded, the blacklist will count for naught (who even talks like that?) Another thing that can mess
+with extension blacklists is to mess around (the best way I could put it). For instance - 
+file.php.jpg, file%2Ephp, etc.
+
+- Secure servers don't trust the Content-Type header and try to validate that the contents of the file
+matches what extension is expected. How is it done? Checking to see if the inner content has some
+attributes of what we'd expect the file type to have. Apparently jpeg files always have the same set of
+bytes in the beginning.
+
+Using ExifTool, you can inject malicious code into file metadata.
+
+- Since the PUT request method gives you the ability to modify resources, you better be sure your
+backend handles that well, as it is basically an upload.
+
+- A whitelist is more useful than a blacklist in this case.
+
+Server Side Request Forgery
+---------------------------
+
+An SSRF attack is basically re-rerouting an HTTP request back to itself using the loopback network
+interface i.e. 127.0.0.1 or localhost. Sometimes, if there are sections of the application
+unaccesible by unauthorized users, an SSRF attack may trick the system into thinking that the
+request came from itself, thereby bypassing the normal logic which checks against this sort of thing.
+
+- In the challenge to perform an SSRF attack against the server, you changed the request to be
+localhost/admin which let us find the admin API to delete a user. Trying the delete button
+straight from the UI didn't let us do it. But then, we found the actual endpoint which does the
+deletion, which was .../admin/deleteUser?id=id. Using the stockAPI request parameter and passing
+in the loopback network URL with the associated endpoint let us perform the deletion with no issue!
+
