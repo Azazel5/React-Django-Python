@@ -282,3 +282,97 @@ you're just performed another XEE attack.
 
 Cross-site scripting (XSS)
 --------------------------
+
+- Allows the attacker to go past the Same Origin policy i.e. things must originate from the same URL
+origin for data to get accesed.
+- A malicious JS file is loaded to the website which gets run by a user.
+- A majority of XSS attacks happen using the "alert" function, but it can also be done by the "print"
+function.
+
+XSS.1 Reflected cross-site scripting
+....................................
+
+- Say a website request works like http://website.com/status?message=hello+there
+
+You can pass in a malicious script tag right there!
+
+XSS.2 Stored cross-site scripting
+.................................
+
+- This is also called second order XSS as the attack gets embedded in an application's response and is
+executed later on. Examples of this could be, comments on blog, contact details for a customer, etc.
+
+Condition - A website lets a user post messages which are displayed to other users like
+<p>Message</p>
+
+Attack - <p><script>/* Bad stuff here... */</script></p>
+
+- Once again, whenever, wherever a user can submit data, you have to be mega careful to sanitize and
+validate.
+
+XSS.3 DOM-based cross-site scripting
+....................................
+
+- If you know the application is uses JS in a way that is processing user data in an unsafe way, it can
+receive malicious XSS payloads.
+
+Example:
+    const x = document.getElementById("x").value
+    const y = document.getElementById("y")
+    y.innerHTML = `X is: ${x}`
+
+Attack:
+    Since the value of x is directly being embedded into y's HTML, you can pass this wherever x's value
+    is taken in the frontend
+
+    <img sec=1 onerror="<script>alert("Gotcha hat!")</script>"
+
+- Content Security Policy is a browser mechanism which makes it tougher to exploit XSS.
+
+Cross-site request forgery (CSRF)
+---------------------------------
+
+- Induces users to perform actions that they don't want.
+
+1. An action (such as changing user-specific data or changing authorization of another user) i.e. the
+action which the user is being fooled to do
+2. If the app only relies on cookies/sessions to identify who made the request.
+3. There needs to be no unpredictable parameters in the request.
+
+An attack to change the email of a user could be as follows:
+
+<html>
+    <body>
+        <form action="https://vulnerable-website.com/email/change" method="POST">
+            <input type="hidden" name="email" value="pwned@evil-user.net" />
+        </form>
+        <script>
+            document.forms[0].submit();
+        </script>
+    </body>
+</html>
+
+If a user navigates to this page, the attacker's page submits a POST request to the vulnerable website
+to change the email field's value, assuming the person is logged into the vulnerable site at the point
+of clicking.
+
+- Store malicious HTML on a website you control and make them visit the site.
+- Self-contained attacks are also possible
+
+    <img src="https://vulnerable-website.com/email/change?email=pwned@evil-user.net">
+
+if the website uses GET to change the email.
+
+- CSRF token + SameSite cookies is a good line of defense
+
+- Even using CSRF tokens do not guarantee that your application is proof against CSRF. Some applications
+only validate the CSRF token for POST request but ignore it for GET. Other applications only validate the
+token if it is present but skip it if it's absent. If the CSRF token isn't tied to a session, an attacker
+can just login to their own account, grab the token, and use that everywhere.
+
+- If the website Referrer header is only validate in the beginning AKA
+    Referrer: http://insecure-website.com
+the attacker can just use this as  a subdomain i.e. http://insecure-website.com.evil-website.com/attack
+
+If the check is that the domain name is available anywhere, the attack could be fashioned like
+http://evil-website.com/attack?insecure-website.com
