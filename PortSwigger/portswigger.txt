@@ -1,3 +1,7 @@
+###############
+# Server Side #
+###############
+
 SQL INJECTIONS
 --------------
 
@@ -220,3 +224,61 @@ take advantage of.
 
 XML external entity (XXE) injection
 -----------------------------------
+
+- The XEE injection is concerned with XML. Often, XEE is escalated to an SSRF attack, which may give the
+attacker full remote access of the server.
+- Whenever you see XML being used to trasmit data between client and server and see that the app is using
+standard library to parse it, get ready.
+
+XEE.1 Exploiting XXE to retrieve files
+......................................
+
+- Add/edit the DOCTYPE element to define an "external entity" containing the path to the file
+- Edit a data value in the XML to make use of the above entity
+
+XML -
+    <?xml version="1.0" encoding="UTF-8"?>
+    <stockCheck><productId>381</productId></stockCheck>
+
+Attack - 
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE foo [ <!ENTITY xxe SYSTEM "file:///etc/passwd"> ]>
+    <stockCheck><productId>&xxe;</productId></stockCheck>
+
+XEE.2 Exploiting XXE to perform SSRF attacks
+............................................
+
+1. Define an external entity using the target URL
+2. Use the entity in a data value
+3. View the response from the URL on the application response
+4. If you can't use the entity in a data value, there's still the potential for a blind SSRF
+
+Attack - <!DOCTYPE foo [ <!ENTITY xxe SYSTEM "http://internal.vulnerable-website.com/"> ]>
+This is making an attack to an internal URL which the vulnerable website can make requests to
+
+XEE.3 Blind XEE
+...............
+
+- Many times applications will not return values of defined external entities. So what do you do?
+- Sometimes, if you look in the right places, you'll find places to do an XEE injection attack
+where no XML is to be seen even!
+
+This happens when client submitted data is embed into an XML document by a SOAP request. In cases like
+this, you cannot control the XML document itself, but you can do a xinclude attack which'll add a file
+which you wish to include.
+
+XEE attacks can be done via file upload as well. Even if the website only allows images to be uploaded,
+you may still be able to submit svg files, which follow an XML based structure. There are many other
+file types which follow an XML-like struture, so passing those in may result in an XEE attack.
+
+- If a website performs POST requests with a Content-Type of application/x-www-form-urlencoded, but also
+tolerate XML, you can change the Content-Type to be text/xml and pass the same request body (foo=bar) as
+<?xml version="1.0" encoding="UTF-8"?><foo>bar</foo>. And with that, you can also pass in an entity and
+you're just performed another XEE attack.
+
+###############
+# Client Side #
+###############
+
+Cross-site scripting (XSS)
+--------------------------
