@@ -398,3 +398,47 @@ the attacker can just use this as  a subdomain i.e. http://insecure-website.com.
 
 If the check is that the domain name is available anywhere, the attack could be fashioned like
 http://evil-website.com/attack?insecure-website.com
+
+Cross Origin Resource Sharing (CORS)
+------------------------------------
+
+Allows controlled accesses to resources in other origins. It adds to the Same Origin Policy (SOP) implemented
+years ago.
+
+- In improperly configred CORS policies, adding an Origin header to the request causes the response to
+contain Access-Control-Allow-Origin header, allowing requests to originate from that website.
+
+This lab, although for an apprentice, took a while because I thought it was really difficult. Here's 
+what I understood from this: 
+    1. Discovered that this website allowed any site using the Origin header to not only return the Access
+    allow header, but also the credentials header.
+    2. Using an XMLHttpRequest to the vulnerable server (with the withCredentials header), send a request,
+    and embed the response in the logs of the exploit server.
+
+If I make the assumption that the Origin header is sent by default by browsers, this makes a little bit
+more sense. In that case, the crucial part of this exploitation is the withCredentials part. An important
+thing here: think from the persepective of the hacker. What use is it if you create an exploitation server
+and log credentials on the client side? You want them to be stored somewhere, maybe a database, or even....
+
+the logs! Eureka!
+
+- The Origin header also supports null value. So, suppose a website does this while performing a GET request
+for some sensitive data. An attacker can use an iframe to attack this.
+- When Origin: null is passed, the response contains Access-Control-Allow-Origin: null. Turns out, an
+iframe with sandbox attribute generates a null origin request.
+
+- You can also exploit XSS attacks through CORS trust relationships, if the website you're trusting has
+bad CORS configs.
+
+- If your HTTPS using website has CORS-whitelisted a plain HTTP using website, an attacker could
+intercept the HTTP request and use the CORS trust relationship to make a spoofed response containing
+a CORS request, which is accepted.
+
+- Most CORS attacks depend on the Access-Allow-Credentials header to be true so the attackers can get
+authentication cookies out of the responses. However, intranet users could be targeted as their IPs
+are private and most likely lax in these types of security. If a user from an intranet accesses the
+public internet, a CORS attack can be issued which uses the user's browser as proxy and access anything
+in the intranet that the user can, provided there are no controls in place for the Access-Allow-Origin.
+
+- "Trusting network configuration alone to protect internal resources is not sufficient when internal 
+browsers can access untrusted external domains."
