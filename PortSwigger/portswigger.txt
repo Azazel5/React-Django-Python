@@ -329,6 +329,28 @@ Attack:
 
 - Content Security Policy is a browser mechanism which makes it tougher to exploit XSS.
 
+An interesting XSS attack -> discovering that the website uses location hashes to jump to a specific
+blog post by using JQuery. This means, anything that gets passed into the website, gets parsed and run
+by JQuery. The instruction was to call the print function and thus perform the XSS attack. In the process,
+I tried to pass javascript:print(), <script>print()</script>, <svg onload=print()>, and other combinations
+but it didn't seem to work. The accepted solution had us go into the exploit server again and upload this
+on the body i.e.
+
+an iframe, containing the src, which is tagged back to the insecure website (with the # as that signals the
+onhashchange function for JQuery). The iframe also needs an onload attribute where this.src is updated like
+this.src += <img src=1 onload=print()> [the latter can also be <svg onload=print()>].
+
+If this website is delivered to a victim, using that website's vulnerability, the attacker will induce a
+client user to run that malicious script, which can do anything that the client can.
+
+Another wild XSS attack where a search term is being encoded written into document.write inside an img tag.
+
+                        var searchTerms = ''-alert(1)-'';
+                        document.write('<img src="/resources/images/tracker.gif?searchTerms='+encodeURIComponent(searchTerms)+'">');
+
+The search term gets injected in the document.write. This solution works because the ' closes out the string; the - makes JS
+think it's subtraction; the alert will then run (or something along those lines).
+
 Cross-site request forgery (CSRF)
 ---------------------------------
 
