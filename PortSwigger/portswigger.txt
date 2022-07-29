@@ -442,3 +442,14 @@ in the intranet that the user can, provided there are no controls in place for t
 
 - "Trusting network configuration alone to protect internal resources is not sufficient when internal 
 browsers can access untrusted external domains."
+
+Clickjacking (UI redressing)
+----------------------------
+
+- These are the embedded iframes/elements that you see on movie streaming websites, where clicking on a
+thing actually triggers something else entirely. An attacker overlays a target website on top of a 
+decoy website, using CSS properties to make the target transparent or something along those lines.
+
+CJ.1 Clickjacking with prefilled form input
+...........................................
+

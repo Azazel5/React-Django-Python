@@ -171,3 +171,5 @@ packages/react-devtools-shell/dist
 # Datasets
 catsVSdogs
 MNIST
+
+.env
